@@ -17,6 +17,7 @@ public class CubeSpawner : MonoBehaviour
     }
 
     public void PlaceCubeAtCoord(Coord coord) {
-        Instantiate(cube, new Vector3(coord.x, 0.5f, coord.y), Quaternion.identity);
+        Transform cubey = Instantiate(cube, new Vector3(coord.x, 0.5f, coord.y), Quaternion.Euler(Vector3.right * -90));
+        cubey.localScale = new Vector3(50f, 50f, 50f);
     }
 }
