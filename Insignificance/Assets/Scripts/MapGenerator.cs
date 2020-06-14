@@ -19,7 +19,6 @@ public class MapGenerator : MonoBehaviour
         cubey = GetComponent<CubeSpawner>();
         coordinates = new Coord[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         GenerateMap();
-        cubey.PlaceCubes(cubeRate, coordinates);
     }
 
     // Update is called once per frame
@@ -47,6 +46,8 @@ public class MapGenerator : MonoBehaviour
                 coordinates[x,y] = new Coord(-mapSize.x / 2 + 0.5f + x, -mapSize.y / 2 + 0.5f + y);
             }
         }
+
+        cubey.PlaceCubes(cubeRate, coordinates, transform);
     }
 
     
