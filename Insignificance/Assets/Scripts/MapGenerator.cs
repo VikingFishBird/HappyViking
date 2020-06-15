@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Threading.Tasks;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -16,12 +17,17 @@ public class MapGenerator : MonoBehaviour
     Transform[,] tiles;
     static GameObject[] tileList;
 
+    bool fullyCollapsed;
+
     // Start is called before the first frame update
     void Start()
     {
         
         // Get Tile Prefabs
         tileList = Resources.LoadAll<GameObject>("Prefabs/Tiles");
+        for(int i = 0; i < tileList.Length; i++) {
+            PlaceCubeAtCoord(new Coord(i, 50), transform, 1, tileList[i].transform, 90);
+        }
         // Initialize coordinates array.
         coordinates = new Coord[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         GenerateMap();
@@ -36,6 +42,7 @@ public class MapGenerator : MonoBehaviour
     public void GenerateMap() {
         // Instantiate the Coefficient Matrix
         coefficientMatrix = new List<int>[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
+        tiles = new Transform[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
 
         // Set coordinates array values
         for (int x = 0; x < mapSize.x; x++) {
@@ -50,19 +57,76 @@ public class MapGenerator : MonoBehaviour
         PlaceHeightMapCubes(noiseMap);
         // Set possibilities for Wave Function Collpase Algorithm
         InstantiateCoeffecientMatrix();
+
+        int count = 0;
+        while (!fullyCollapsed) {
+            int minx, miny;
+            FindTileWithFewestPossibilities(out minx, out miny);
+            SetTile(minx, miny);
+            ResetCoeffecientMatrixSurroundingTile(minx, miny);
+            fullyCollapsed = CheckIfCollapsed();
+            count++;
+            if(count > 1000) {
+                break;
+            }
+        }
+
+        /* Places every possible cube (lags out like crazy)
         for (int x = 0; x < coefficientMatrix.GetLength(0); x++) {
             for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
                 for(int i = 0; i < coefficientMatrix[x,y].Count; i++) {
                     PlaceCubeAtCoord(coordinates[x, y], transform, 1, tileList[coefficientMatrix[x, y][i]].transform);
                 }
             }
+        }*/
+    }
+
+    public void SetTile(int x, int y) {
+        int tileIndex = 0;
+
+        float sum = 0f;
+        for(int i = 0; i < coefficientMatrix[x,y].Count; i++) {
+            sum += tileList[coefficientMatrix[x, y][i]].GetComponent<Tile>().tileWeight;
         }
+        float rand = Random.Range(0.0f, sum);
+        float cumulativeSum = 0f;
+        for (int i = 0; i < coefficientMatrix[x, y].Count; i++) {
+            cumulativeSum += tileList[coefficientMatrix[x, y][i]].GetComponent<Tile>().tileWeight;
+            if(rand < cumulativeSum) {
+                tileIndex = i;
+                float rot = GetRotation(tileList[i].GetComponent<Tile>(), x, y);
+                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], transform, 1, tileList[i].transform, rot);
+                coefficientMatrix[x, y].Clear();
+                return;
+            }
+        }
+    }
+
+    public void FindTileWithFewestPossibilities(out int minx, out int miny) {
+        int min = int.MaxValue;
+        int xIndex = 0;
+        int yIndex = 0;
+
+        for (int x = 0; x < coefficientMatrix.GetLength(0); x++) {
+            for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
+                if(tiles[x,y] == null) {
+                    if (coefficientMatrix[x, y].Count > 0 && coefficientMatrix[x, y].Count < min) {
+                        min = coefficientMatrix[x, y].Count;
+                        xIndex = x;
+                        yIndex = y;
+                    }
+                }
+            }
+        }
+        minx = xIndex;
+        miny = yIndex;
     }
 
     public void InstantiateCoeffecientMatrix() {
         for(int x = 0; x < coefficientMatrix.GetLength(0); x++) {
             for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
-                if(tiles[x,y] == null) {
+                coefficientMatrix[x, y] = new List<int>();
+                if (tiles[x,y] == null) {
                     for(int i = 0; i < tileList.Length; i++) {
                         if(CheckValid(tileList[i].GetComponent<Tile>(), x, y)) {
                             coefficientMatrix[x, y].Add(i);
@@ -71,6 +135,61 @@ public class MapGenerator : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ResetCoeffecientMatrixSurroundingTile(int x, int y) {
+        if(x > 0) {
+            if (tiles[x - 1, y] == null) {
+                coefficientMatrix[x - 1, y] = new List<int>();
+                for (int i = 0; i < tileList.Length; i++) {
+                    if (CheckValid(tileList[i].GetComponent<Tile>(), x - 1, y)) {
+                        coefficientMatrix[x - 1, y].Add(i);
+                    }
+                }
+            }
+        }
+        if (x < Mathf.RoundToInt(mapSize.x) - 1) {
+            if (tiles[x + 1, y] == null) {
+                coefficientMatrix[x + 1, y] = new List<int>();
+                for (int i = 0; i < tileList.Length; i++) {
+                    if (CheckValid(tileList[i].GetComponent<Tile>(), x + 1, y)) {
+                        coefficientMatrix[x + 1, y].Add(i);
+                    }
+                }
+            }
+        }
+        if (y > 0) {
+            if (tiles[x, y - 1] == null) {
+                coefficientMatrix[x, y - 1] = new List<int>();
+                for (int i = 0; i < tileList.Length; i++) {
+                    if (CheckValid(tileList[i].GetComponent<Tile>(), x, y - 1)) {
+                        coefficientMatrix[x, y - 1].Add(i);
+                    }
+                }
+            }
+        }
+        if (y < Mathf.RoundToInt(mapSize.y) - 1) {
+            if (tiles[x, y + 1] == null) {
+                coefficientMatrix[x, y + 1] = new List<int>();
+                for (int i = 0; i < tileList.Length; i++) {
+                    if (CheckValid(tileList[i].GetComponent<Tile>(), x, y + 1)) {
+                        coefficientMatrix[x, y + 1].Add(i);
+                    }
+                }
+            }
+        }
+
+    }
+
+    public bool CheckIfCollapsed() {
+        for(int x = 0; x < tiles.GetLength(0); x++) {
+            for (int y = 0; y < tiles.GetLength(1); y++) {
+                if(tiles[x,y] == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     // Creates Noise Map... yeah
@@ -125,10 +244,10 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < coordinates.GetLength(1); y++) {
                 int heightLevel = GetHeightLevelFromPerlin(perlin[x, y]);
                 if(heightLevel == 0) {
-                    tiles[x,y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, waterTile);
+                    tiles[x,y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, waterTile, 0f);
                 }
                 else if(heightLevel > 1) {
-                    tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, landTile);
+                    tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, landTile, 0f);
                 }
             }
         }
@@ -136,8 +255,8 @@ public class MapGenerator : MonoBehaviour
         // Refine Mountains
     }
 
-    public Transform PlaceCubeAtCoord(Coord coord, Transform parent, int heightLevel, Transform tile) {
-        Transform cubey = Instantiate(tile, new Vector3(coord.x, -0.5f + heightLevel, coord.y), Quaternion.Euler(Vector3.zero));
+    public Transform PlaceCubeAtCoord(Coord coord, Transform parent, int heightLevel, Transform tile, float rot) {
+        Transform cubey = Instantiate(tile, new Vector3(coord.x, -0.5f + heightLevel, coord.y), Quaternion.Euler(new Vector3(0, rot, 0)));
         if(heightLevel == 0) {
             cubey.localPosition = cubey.localPosition + Vector3.up;
         }
@@ -155,6 +274,55 @@ public class MapGenerator : MonoBehaviour
         return 0;
     }
 
+    private float GetRotation(Tile tile, int x, int y) {
+        // Tile sides.
+        Tile.SideType tileUp = tile.upSide;
+        Tile.SideType tileDown = tile.downSide;
+        Tile.SideType tileLeft = tile.leftSide;
+        Tile.SideType tileRight = tile.rightSide;
+
+        // Sides of neighboring tiles. Left = Left of current tile.
+        Tile.SideType upSide = Tile.SideType.DNE;
+        Tile.SideType downSide = Tile.SideType.DNE;
+        Tile.SideType leftSide = Tile.SideType.DNE;
+        Tile.SideType rightSide = Tile.SideType.DNE;
+
+        // Set Neighboring tile sides.
+
+
+        if (y > 0 && tiles[x, y - 1] != null) {
+            upSide = tiles[x, y - 1].gameObject.GetComponent<Tile>().downSide;
+        }
+        if (y < Mathf.RoundToInt(mapSize.y) - 1 && tiles[x, y + 1] != null) {
+            downSide = tiles[x, y + 1].gameObject.GetComponent<Tile>().upSide;
+        }
+        if (x > 0 && tiles[x - 1, y] != null) {
+            leftSide = tiles[x - 1, y].gameObject.GetComponent<Tile>().rightSide;
+        }
+        if (x < Mathf.RoundToInt(mapSize.x) - 1 && tiles[x + 1, y] != null) {
+            rightSide = tiles[x + 1, y].gameObject.GetComponent<Tile>().leftSide;
+        }
+
+        float rot = 0f;
+        for (int i = 0; i < 4; i++) {
+            if ((tileUp == upSide || upSide == Tile.SideType.DNE)
+            && (tileDown == downSide || downSide == Tile.SideType.DNE)
+            && (tileLeft == leftSide || leftSide == Tile.SideType.DNE)
+            && (tileRight == rightSide || rightSide == Tile.SideType.DNE)) {
+                return rot;
+            }
+            // Rotate
+            rot += 90;
+            Tile.SideType temp = tileUp;
+            tileUp = tileRight;
+            tileRight = tileDown;
+            tileDown = tileLeft;
+            tileLeft = temp;
+        }
+        
+        return rot;
+    }
+
     private bool CheckValid(Tile tile, int x, int y) {
         // Tile sides.
         Tile.SideType tileUp = tile.upSide;
@@ -169,16 +337,22 @@ public class MapGenerator : MonoBehaviour
         Tile.SideType rightSide = Tile.SideType.DNE;
 
         // Set Neighboring tile sides.
-        if (y > 0 && tiles[x, y - 1] != null)
-            upSide = tiles[x, y - 1].GetComponent<Tile>().downSide;
-        if (y < Mathf.RoundToInt(mapSize.y) - 1 && tiles[x, y + 1] != null)
-            downSide = tiles[x, y + 1].GetComponent<Tile>().upSide;
-        if (x > 0 && tiles[x-1, y] != null)
-            leftSide = tiles[x-1, y].GetComponent<Tile>().rightSide;
-        if (x < Mathf.RoundToInt(mapSize.x) - 1 && tiles[x + 1, y] != null)
-            rightSide = tiles[x+1, y].GetComponent<Tile>().leftSide;
 
-        for(int i = 0; i < 4; i++) {
+
+        if (y > 0 && tiles[x, y - 1] != null) {
+            upSide = tiles[x, y - 1].gameObject.GetComponent<Tile>().downSide;
+        }
+        if (y < Mathf.RoundToInt(mapSize.y) - 1 && tiles[x, y + 1] != null) {
+            downSide = tiles[x, y + 1].gameObject.GetComponent<Tile>().upSide;
+        }
+        if (x > 0 && tiles[x-1, y] != null) {
+            leftSide = tiles[x - 1, y].gameObject.GetComponent<Tile>().rightSide;
+        }
+        if (x < Mathf.RoundToInt(mapSize.x) - 1 && tiles[x + 1, y] != null) {
+            rightSide = tiles[x + 1, y].gameObject.GetComponent<Tile>().leftSide;
+        }
+
+        for (int i = 0; i < 4; i++) {
             if ((tileUp == upSide || upSide == Tile.SideType.DNE)
             && (tileDown == downSide || downSide == Tile.SideType.DNE)
             && (tileLeft == leftSide || leftSide == Tile.SideType.DNE)

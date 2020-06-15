@@ -45,10 +45,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   upSide: 3
-  downSide: 0
   leftSide: 2
+  downSide: 0
   rightSide: 0
-  tileWeight: 0.3
+  tileWeight: 3.3
   tileLevel: 0
 --- !u!114 &1851875625235419104
 MonoBehaviour:
@@ -63,8 +63,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   upSide: 0
-  downSide: 0
   leftSide: 0
+  downSide: 0
   rightSide: 0
   tileWeight: 0
   tileLevel: 0

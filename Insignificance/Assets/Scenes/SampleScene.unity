@@ -870,9 +870,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapSize: {x: 40, y: 40}
-  waterTile: {fileID: 1601860385781157633, guid: d24bd97a1356d484bb7e902e1eaee3c0,
+  waterTile: {fileID: 3534400398522354784, guid: a4c13fe9c1df59e4792111d6f5313b9a,
     type: 3}
-  landTile: {fileID: 684931245586463947, guid: e55963958063d704b9752508b28230bb, type: 3}
+  landTile: {fileID: 8137103259800632613, guid: 2fbe1057816e2f140bfc42d7632f05c4,
+    type: 3}
   noiseMapScale: 8.01
 --- !u!4 &1664678916
 Transform:
