@@ -354,7 +354,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 0.5
+  m_Intensity: 0.41
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -850,7 +850,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1664678916}
   - component: {fileID: 1664678915}
-  - component: {fileID: 1664678917}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -870,10 +869,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bce5d73661422234999aa22935a4de48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilePrefab: {fileID: 6345248798926627166, guid: 613255b833fa56a479fd7ea3a67ce243,
-    type: 3}
   mapSize: {x: 40, y: 40}
-  cubeRate: 0.356
+  waterTile: {fileID: 1601860385781157633, guid: d24bd97a1356d484bb7e902e1eaee3c0,
+    type: 3}
+  landTile: {fileID: 684931245586463947, guid: e55963958063d704b9752508b28230bb, type: 3}
   noiseMapScale: 8.01
 --- !u!4 &1664678916
 Transform:
@@ -889,21 +888,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1664678917
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1664678914}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57d0261d596882a43b9b88f3262ae84d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cube: {fileID: -8679921383154817045, guid: ebc449060500e2d43ae6b936a4a3cec6, type: 3}
-  grass: {fileID: 2100000, guid: b7a98afe526a3a24193a9044f2556445, type: 2}
-  water: {fileID: 2100000, guid: 31f937e4947ea1e4c82e014f3dff8bda, type: 2}
 --- !u!1 &1950340700
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,22 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CubeSpawner))]
 public class MapGenerator : MonoBehaviour
 {
-    public Transform tilePrefab;
     public Vector2 mapSize;
 
+    public Transform waterTile;
+    public Transform landTile;
+
     public Coord[,] coordinates;
-    [Range(0.0f, 1.0f)]
-    public float cubeRate;
     public float noiseMapScale;
-    CubeSpawner cubey;
+
+    List<int>[,] coefficientMatrix;
+    Transform[,] tiles;
+    static GameObject[] tileList;
 
     // Start is called before the first frame update
     void Start()
     {
-        cubey = GetComponent<CubeSpawner>();
+        
+        // Get Tile Prefabs
+        tileList = Resources.LoadAll<GameObject>("Prefabs/Tiles");
+        // Initialize coordinates array.
         coordinates = new Coord[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         GenerateMap();
     }
@@ -29,32 +34,47 @@ public class MapGenerator : MonoBehaviour
     }
 
     public void GenerateMap() {
-        string holderName = "Generated Map";
-        if (transform.Find(holderName)) {
-            DestroyImmediate(transform.Find(holderName).gameObject);
-        }
+        // Instantiate the Coefficient Matrix
+        coefficientMatrix = new List<int>[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
 
-        Transform mapHolder = new GameObject(holderName).transform;
-        mapHolder.parent = transform;
-
+        // Set coordinates array values
         for (int x = 0; x < mapSize.x; x++) {
             for(int y = 0; y < mapSize.y; y++) {
-                //Vector3 tilePosition = new Vector3(-mapSize.x / 2 + 0.5f + x, 0, -mapSize.y / 2 + 0.5f + y);
-                //Transform newTile = Instantiate(tilePrefab, tilePosition, Quaternion.Euler(Vector3.right * 90)) as Transform;
-
-                //newTile.parent = mapHolder;
-
-                coordinates[x,y] = new Coord(-mapSize.x / 2 + 0.5f + x, -mapSize.y / 2 + 0.5f + y);
-                
+                coordinates[x,y] = new Coord(-mapSize.x / 2 + 0.5f + x, -mapSize.y / 2 + 0.5f + y);             
             }
         }
 
+        // Get Noise Map
         float[,] noiseMap = GenerateNoiseMap(noiseMapScale);
-        cubey.PlaceCubes(coordinates, transform, noiseMap);
-
+        // Set Water / Mountains
+        PlaceHeightMapCubes(noiseMap);
+        // Set possibilities for Wave Function Collpase Algorithm
+        InstantiateCoeffecientMatrix();
+        for (int x = 0; x < coefficientMatrix.GetLength(0); x++) {
+            for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
+                for(int i = 0; i < coefficientMatrix[x,y].Count; i++) {
+                    PlaceCubeAtCoord(coordinates[x, y], transform, 1, tileList[coefficientMatrix[x, y][i]].transform);
+                }
+            }
+        }
     }
 
-    public float[,] GenerateNoiseMap(float scale) {
+    public void InstantiateCoeffecientMatrix() {
+        for(int x = 0; x < coefficientMatrix.GetLength(0); x++) {
+            for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
+                if(tiles[x,y] == null) {
+                    for(int i = 0; i < tileList.Length; i++) {
+                        if(CheckValid(tileList[i].GetComponent<Tile>(), x, y)) {
+                            coefficientMatrix[x, y].Add(i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Creates Noise Map... yeah
+    private float[,] GenerateNoiseMap(float scale) {
         float[,] noiseMap = new float[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         float offSetX = Random.Range(-100000, 100000);
         float offSetY = Random.Range(-100000, 100000);
@@ -63,7 +83,6 @@ public class MapGenerator : MonoBehaviour
         float halfHeight = mapSize.y / 2f;
 
         for (int x = 0; x < mapSize.x; x++) {
-            //List<string> perlinNoiseThings = new List<string>();
 
             for (int y = 0; y < mapSize.y; y++) {
                 float sampleX = (x - halfWidth + offSetX) / scale;
@@ -72,14 +91,108 @@ public class MapGenerator : MonoBehaviour
                 float perlinValue = Mathf.Clamp(Mathf.PerlinNoise(sampleX, sampleY), 0, 1);
                 
                 noiseMap[x, y] = perlinValue;
-                //perlinNoiseThings.Add(Mathf.PerlinNoise(sampleX, sampleY).ToString());
             }
-
-            //print(string.Join(" | ", perlinNoiseThings));
-            //perlinNoiseThings = new List<string>();
         }
 
         return noiseMap;
 
-    }   
+    }
+
+    // Adjust Values in method for mountain perlin heights.
+    private int GetHeightLevelFromPerlin(float val) {
+        if (val <= 0.3f)
+            return 0;
+        else if (val <= 0.75f)
+            return 1;
+        else if (val <= 0.9f)
+            return 2;
+        else
+            return 3;
+    }
+
+    public void PlaceHeightMapCubes(float[,] perlin) {
+        // Make sure the heirarchy isn't cluttered:
+        string holderName = "Object Holder";
+        if (transform.Find(holderName)) {
+            DestroyImmediate(transform.Find(holderName).gameObject);
+        }
+
+        Transform mapHolder = new GameObject(holderName).transform;
+        mapHolder.parent = transform;
+
+        // Place Water/Mountain Cubes
+        for (int x = 0; x < coordinates.GetLength(0); x++) {
+            for (int y = 0; y < coordinates.GetLength(1); y++) {
+                int heightLevel = GetHeightLevelFromPerlin(perlin[x, y]);
+                if(heightLevel == 0) {
+                    tiles[x,y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, waterTile);
+                }
+                else if(heightLevel > 1) {
+                    tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, landTile);
+                }
+            }
+        }
+
+        // Refine Mountains
+    }
+
+    public Transform PlaceCubeAtCoord(Coord coord, Transform parent, int heightLevel, Transform tile) {
+        Transform cubey = Instantiate(tile, new Vector3(coord.x, -0.5f + heightLevel, coord.y), Quaternion.Euler(Vector3.zero));
+        if(heightLevel == 0) {
+            cubey.localPosition = cubey.localPosition + Vector3.up;
+        }
+        cubey.parent = parent;
+        return cubey;
+    }
+
+    private int GetTileIndexFromName(string name) {
+        for(int i = 0; i < tileList.Length; i++) {
+            if (tileList[i].name.Equals(name)) {
+                return i;
+            }
+        }
+        print("Could not find tile: " + name);
+        return 0;
+    }
+
+    private bool CheckValid(Tile tile, int x, int y) {
+        // Tile sides.
+        Tile.SideType tileUp = tile.upSide;
+        Tile.SideType tileDown = tile.downSide;
+        Tile.SideType tileLeft = tile.leftSide;
+        Tile.SideType tileRight = tile.rightSide;
+
+        // Sides of neighboring tiles. Left = Left of current tile.
+        Tile.SideType upSide = Tile.SideType.DNE;
+        Tile.SideType downSide = Tile.SideType.DNE;
+        Tile.SideType leftSide = Tile.SideType.DNE;
+        Tile.SideType rightSide = Tile.SideType.DNE;
+
+        // Set Neighboring tile sides.
+        if (y > 0 && tiles[x, y - 1] != null)
+            upSide = tiles[x, y - 1].GetComponent<Tile>().downSide;
+        if (y < Mathf.RoundToInt(mapSize.y) - 1 && tiles[x, y + 1] != null)
+            downSide = tiles[x, y + 1].GetComponent<Tile>().upSide;
+        if (x > 0 && tiles[x-1, y] != null)
+            leftSide = tiles[x-1, y].GetComponent<Tile>().rightSide;
+        if (x < Mathf.RoundToInt(mapSize.x) - 1 && tiles[x + 1, y] != null)
+            rightSide = tiles[x+1, y].GetComponent<Tile>().leftSide;
+
+        for(int i = 0; i < 4; i++) {
+            if ((tileUp == upSide || upSide == Tile.SideType.DNE)
+            && (tileDown == downSide || downSide == Tile.SideType.DNE)
+            && (tileLeft == leftSide || leftSide == Tile.SideType.DNE)
+            && (tileRight == rightSide || rightSide == Tile.SideType.DNE)) {
+                return true;
+            }
+            // Rotate
+            Tile.SideType temp = tileUp;
+            tileUp = tileRight;
+            tileRight = tileDown;
+            tileDown = tileLeft;
+            tileLeft = temp;
+        }
+
+        return false;
+    }
 }

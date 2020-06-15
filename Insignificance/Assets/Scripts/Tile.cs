@@ -2,11 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tile
+public class Tile : MonoBehaviour
 {
-    public enum TileType { River, Coast, Land, Unwalkable };
-    public TileType tileType;
-    
+    public enum SideType { Water, Land, BeachUp, BeachDown, Air, MountainUp, MountainDown, DoubleMountain, StairUp, StairDown, DNE };
+    // Tile types;
+    public SideType upSide;
+    public SideType leftSide;
+    public SideType downSide;
+    public SideType rightSide;
+
+    // How often a tile is placed.
+    public float tileWeight;
+
+    // Height of tile.
+    public int tileLevel;
 
     // Start is called before the first frame update
     void Start()
@@ -18,5 +27,13 @@ public class Tile
     void Update()
     {
         
+    }
+
+    public void setAllTiles() {
+
+    }
+
+    public bool checkCompatible(Tile other) {
+        return false;
     }
 }
