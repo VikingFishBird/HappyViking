@@ -22,7 +22,6 @@ public class MapGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
         // Get Tile Prefabs
         tileList = Resources.LoadAll<GameObject>("Prefabs/Tiles");
         for(int i = 0; i < tileList.Length; i++) {
@@ -66,17 +65,19 @@ public class MapGenerator : MonoBehaviour
             ResetCoeffecientMatrixSurroundingTile(minx, miny);
             fullyCollapsed = CheckIfCollapsed();
             count++;
-            if(count > 1000) {
+            if(count > 1) {
                 break;
             }
         }
 
-        /* Places every possible cube (lags out like crazy)
-        for (int x = 0; x < coefficientMatrix.GetLength(0); x++) {
-            for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
+        /*
+        for (int x = 0; x < coefficientMatrix.GetLength(0); x = x + 5) {
+            for (int y = 0; y < coefficientMatrix.GetLength(1); y = y +5) {
+                List<string> tileStrings = new List<string>();
                 for(int i = 0; i < coefficientMatrix[x,y].Count; i++) {
-                    PlaceCubeAtCoord(coordinates[x, y], transform, 1, tileList[coefficientMatrix[x, y][i]].transform);
+                    tileStrings.Add(tileList[coefficientMatrix[x, y][i]].name);
                 }
+                CreateWorldText(transform, string.Join(" | ", tileStrings), new Vector3(coordinates[x, y].x, 0, coordinates[x, y].y), 2, Color.black, TextAnchor.MiddleCenter, TextAlignment.Center, new Vector3(-90, 0, 0));
             }
         }*/
     }
@@ -95,7 +96,7 @@ public class MapGenerator : MonoBehaviour
             if(rand < cumulativeSum) {
                 tileIndex = i;
                 float rot = GetRotation(tileList[i].GetComponent<Tile>(), x, y);
-                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], transform, 1, tileList[i].transform, rot);
+                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], transform, -1, tileList[i].transform, rot);
                 coefficientMatrix[x, y].Clear();
                 return;
             }
@@ -120,6 +121,9 @@ public class MapGenerator : MonoBehaviour
         }
         minx = xIndex;
         miny = yIndex;
+        for(int i = 0; i < coefficientMatrix[minx, miny].Count; i++) {
+            print(tileList[coefficientMatrix[minx, miny][i]].name);
+        }
     }
 
     public void InstantiateCoeffecientMatrix() {
@@ -309,6 +313,7 @@ public class MapGenerator : MonoBehaviour
             && (tileDown == downSide || downSide == Tile.SideType.DNE)
             && (tileLeft == leftSide || leftSide == Tile.SideType.DNE)
             && (tileRight == rightSide || rightSide == Tile.SideType.DNE)) {
+                print(rot);
                 return rot;
             }
             // Rotate
@@ -368,5 +373,20 @@ public class MapGenerator : MonoBehaviour
         }
 
         return false;
+    }
+
+    public TextMesh CreateWorldText(Transform parent, string text, Vector3 localPosition, int fontSize, Color color, TextAnchor textAnchor, TextAlignment textAlignment, Vector3 rotation) {
+        GameObject gameObject = new GameObject("World_Text", typeof(TextMesh));
+        Transform transform = gameObject.transform;
+        transform.SetParent(parent, false);
+        transform.localPosition = localPosition;
+        TextMesh textMesh = gameObject.GetComponent<TextMesh>();
+        textMesh.anchor = textAnchor;
+        textMesh.alignment = textAlignment;
+        textMesh.text = text;
+        textMesh.fontSize = fontSize;
+        textMesh.color = color;
+        textMesh.transform.localRotation = Quaternion.Euler(rotation);
+        return textMesh;
     }
 }

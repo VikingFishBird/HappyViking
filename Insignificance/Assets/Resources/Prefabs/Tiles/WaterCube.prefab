@@ -48,7 +48,7 @@ MonoBehaviour:
   leftSide: 0
   downSide: 0
   rightSide: 0
-  tileWeight: 0.8
+  tileWeight: 0.1
   tileLevel: 0
 --- !u!1 &8661658132385610351
 GameObject:
