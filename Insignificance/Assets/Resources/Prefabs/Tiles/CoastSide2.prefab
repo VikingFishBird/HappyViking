@@ -45,11 +45,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   upSide: 1
-  downSide: 0
   leftSide: 2
+  downSide: 0
   rightSide: 3
-  tileWeight: 0.6
+  tileWeight: 0.02
   tileLevel: 0
+  Mountain: 0
+  CoastOrWater: 1
 --- !u!1001 &6908270520810097431
 PrefabInstance:
   m_ObjectHideFlags: 0

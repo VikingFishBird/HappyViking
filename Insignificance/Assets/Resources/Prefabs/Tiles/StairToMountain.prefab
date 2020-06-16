@@ -50,6 +50,7 @@ MonoBehaviour:
   rightSide: 6
   tileWeight: 0
   tileLevel: 2
+  Mountain: 1
 --- !u!1001 &1946564107349158466
 PrefabInstance:
   m_ObjectHideFlags: 0

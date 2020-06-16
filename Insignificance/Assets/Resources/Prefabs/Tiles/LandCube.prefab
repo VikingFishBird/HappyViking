@@ -48,8 +48,10 @@ MonoBehaviour:
   leftSide: 1
   downSide: 1
   rightSide: 1
-  tileWeight: 2
+  tileWeight: 10
   tileLevel: 1
+  Mountain: 0
+  CoastOrWater: 1
 --- !u!1 &7583216984909429109
 GameObject:
   m_ObjectHideFlags: 0

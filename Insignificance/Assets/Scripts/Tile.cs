@@ -17,6 +17,9 @@ public class Tile : MonoBehaviour
     // Height of tile.
     public int tileLevel;
 
+    public bool Mountain;
+    public bool CoastOrWater;
+
     // Start is called before the first frame update
     void Start()
     {
