@@ -20,23 +20,4 @@ public class Tile : MonoBehaviour
     public bool Mountain;
     public bool CoastOrWater;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void setAllTiles() {
-
-    }
-
-    public bool checkCompatible(Tile other) {
-        return false;
-    }
 }

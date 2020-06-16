@@ -869,7 +869,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bce5d73661422234999aa22935a4de48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSize: {x: 100, y: 100}
+  mapSize: {x: 40, y: 40}
   waterTile: {fileID: 3534400398522354784, guid: a4c13fe9c1df59e4792111d6f5313b9a,
     type: 3}
   landTile: {fileID: 8137103259800632613, guid: 2fbe1057816e2f140bfc42d7632f05c4,

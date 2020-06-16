@@ -10,6 +10,8 @@ public class MapGenerator : MonoBehaviour
     public Transform waterTile;
     public Transform landTile;
 
+    Transform mapHolder;
+
     public Coord[,] coordinates;
     public float noiseMapScale;
 
@@ -52,6 +54,15 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
+        // Make sure the heirarchy isn't cluttered and delete existing map blocks.
+        string holderName = "Object Holder";
+        if (transform.Find(holderName)) {
+            DestroyImmediate(transform.Find(holderName).gameObject);
+        }
+
+        mapHolder = new GameObject(holderName).transform;
+        mapHolder.parent = transform;
+
         // Get Noise Map
         float[,] noiseMap = GenerateNoiseMap(noiseMapScale);
         // Set Water / Mountains
@@ -76,6 +87,37 @@ public class MapGenerator : MonoBehaviour
                 break;
             }
         }
+        // Reset fully collapsed bool value.
+        fullyCollapsed = false;
+    }
+
+    // Finds which tile has the fewest valid potential tiles.
+    public void FindTileWithFewestPossibilities(out int minx, out int miny) {
+        int min = int.MaxValue;
+        int xIndex = 0;
+        int yIndex = 0;
+
+        List<int> xZeros = new List<int>();
+        List<int> yZeros = new List<int>();
+
+        for (int x = 0; x < coefficientMatrix.GetLength(0); x++) {
+            for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
+                if (tiles[x, y] == null) {
+                    if (coefficientMatrix[x, y].Count > 0 && coefficientMatrix[x, y].Count < min) {
+                        min = coefficientMatrix[x, y].Count;
+                        xIndex = x;
+                        yIndex = y;
+                    }
+                    else if (coefficientMatrix[x, y].Count == 0) {
+                        xZeros.Add(x);
+                        yZeros.Add(y);
+                    }
+                }
+            }
+        }
+        minx = xIndex;
+        miny = yIndex;
+        BackTrack(xZeros, yZeros);
     }
 
     // Selects a random valid tile and places it.
@@ -90,40 +132,11 @@ public class MapGenerator : MonoBehaviour
             cumulativeSum += tileList[coefficientMatrix[x, y][i].index].GetComponent<Tile>().tileWeight;
             if(rand < cumulativeSum) {
                 float rot = coefficientMatrix[x, y][i].rotation;
-                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], transform, coefficientMatrix[x, y][i].heightLevel, tileList[coefficientMatrix[x, y][i].index].transform, rot);
+                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, coefficientMatrix[x, y][i].heightLevel, tileList[coefficientMatrix[x, y][i].index].transform, rot);
                 coefficientMatrix[x, y].Clear();
                 return;
             }
         }
-    }
-
-    // Finds which tile has the fewest valid potential tiles.
-    public void FindTileWithFewestPossibilities(out int minx, out int miny) {
-        int min = int.MaxValue;
-        int xIndex = 0;
-        int yIndex = 0;
-
-        List<int> xZeros = new List<int>();
-        List<int> yZeros = new List<int>();
-
-        for (int x = 0; x < coefficientMatrix.GetLength(0); x++) {
-            for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
-                if(tiles[x,y] == null) {
-                    if (coefficientMatrix[x, y].Count > 0 && coefficientMatrix[x, y].Count < min) {
-                        min = coefficientMatrix[x, y].Count;
-                        xIndex = x;
-                        yIndex = y;
-                    }
-                    else if(coefficientMatrix[x, y].Count == 0) {
-                        xZeros.Add(x);
-                        yZeros.Add(y);
-                    }
-                }
-            }
-        }
-        minx = xIndex;
-        miny = yIndex;
-        BackTrack(xZeros, yZeros);
     }
 
     // Sets the surrounding tiles (including kitty corners) to null and resets the surrounding co-matrices.
@@ -304,15 +317,6 @@ public class MapGenerator : MonoBehaviour
 
     // Places HeightMapCubes ||| Need to change mountains.
     public void PlaceHeightMapCubes(float[,] perlin) {
-        // Make sure the heirarchy isn't cluttered:
-        string holderName = "Object Holder";
-        if (transform.Find(holderName)) {
-            DestroyImmediate(transform.Find(holderName).gameObject);
-        }
-
-        Transform mapHolder = new GameObject(holderName).transform;
-        mapHolder.parent = transform;
-
         // Place Water/Mountain Cubes
         for (int x = 0; x < coordinates.GetLength(0); x++) {
             for (int y = 0; y < coordinates.GetLength(1); y++) {
@@ -325,8 +329,6 @@ public class MapGenerator : MonoBehaviour
                 }
             }
         }
-
-        // Refine Mountains
     }
 
     // Places tile at a coordinate... yep.
