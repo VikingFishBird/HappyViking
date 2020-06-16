@@ -46,7 +46,7 @@ public class MapGenerator : MonoBehaviour
         // Set coordinates array values
         for (int x = 0; x < mapSize.x; x++) {
             for(int y = 0; y < mapSize.y; y++) {
-                coordinates[x,y] = new Coord(-mapSize.x / 2 + 0.5f + x, -mapSize.y / 2 + 0.5f + y);             
+                coordinates[x,y] = new Coord(-mapSize.x / 2 + 0.5f + x, mapSize.y / 2 - 0.5f - y);             
             }
         }
 
@@ -65,7 +65,7 @@ public class MapGenerator : MonoBehaviour
             ResetCoeffecientMatrixSurroundingTile(minx, miny);
             fullyCollapsed = CheckIfCollapsed();
             count++;
-            if(count > 1) {
+            if(count > 1000) {
                 break;
             }
         }
@@ -83,8 +83,6 @@ public class MapGenerator : MonoBehaviour
     }
 
     public void SetTile(int x, int y) {
-        int tileIndex = 0;
-
         float sum = 0f;
         for(int i = 0; i < coefficientMatrix[x,y].Count; i++) {
             sum += tileList[coefficientMatrix[x, y][i]].GetComponent<Tile>().tileWeight;
@@ -94,9 +92,8 @@ public class MapGenerator : MonoBehaviour
         for (int i = 0; i < coefficientMatrix[x, y].Count; i++) {
             cumulativeSum += tileList[coefficientMatrix[x, y][i]].GetComponent<Tile>().tileWeight;
             if(rand < cumulativeSum) {
-                tileIndex = i;
-                float rot = GetRotation(tileList[i].GetComponent<Tile>(), x, y);
-                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], transform, -1, tileList[i].transform, rot);
+                float rot = GetRotation(tileList[coefficientMatrix[x, y][i]].GetComponent<Tile>(), x, y);
+                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], transform, -1, tileList[coefficientMatrix[x, y][i]].transform, rot);
                 coefficientMatrix[x, y].Clear();
                 return;
             }
@@ -261,7 +258,18 @@ public class MapGenerator : MonoBehaviour
 
     public Transform PlaceCubeAtCoord(Coord coord, Transform parent, int heightLevel, Transform tile, float rot) {
         Transform cubey = Instantiate(tile, new Vector3(coord.x, -0.5f + heightLevel, coord.y), Quaternion.Euler(new Vector3(0, rot, 0)));
-        if(heightLevel == 0) {
+
+        float i = 0f;
+        while(i < rot) {
+            Tile.SideType temp = cubey.gameObject.GetComponent<Tile>().upSide;
+            cubey.gameObject.GetComponent<Tile>().upSide = cubey.gameObject.GetComponent<Tile>().leftSide;
+            cubey.gameObject.GetComponent<Tile>().leftSide = cubey.gameObject.GetComponent<Tile>().downSide;
+            cubey.gameObject.GetComponent<Tile>().downSide = cubey.gameObject.GetComponent<Tile>().rightSide;
+            cubey.gameObject.GetComponent<Tile>().rightSide = temp;
+            i += 90f;
+        }
+
+        if (heightLevel == 0) {
             cubey.localPosition = cubey.localPosition + Vector3.up;
         }
         cubey.parent = parent;
@@ -292,8 +300,6 @@ public class MapGenerator : MonoBehaviour
         Tile.SideType rightSide = Tile.SideType.DNE;
 
         // Set Neighboring tile sides.
-
-
         if (y > 0 && tiles[x, y - 1] != null) {
             upSide = tiles[x, y - 1].gameObject.GetComponent<Tile>().downSide;
         }
@@ -307,22 +313,103 @@ public class MapGenerator : MonoBehaviour
             rightSide = tiles[x + 1, y].gameObject.GetComponent<Tile>().leftSide;
         }
 
+        if (upSide == Tile.SideType.BeachUp) {
+            upSide = Tile.SideType.BeachDown;
+        }
+        else if(upSide == Tile.SideType.BeachDown) {
+            upSide = Tile.SideType.BeachUp;
+        }
+        else if (upSide == Tile.SideType.MountainUp) {
+            upSide = Tile.SideType.MountainDown;
+        }
+        else if (upSide == Tile.SideType.MountainDown) {
+            upSide = Tile.SideType.MountainUp;
+        }
+        else if (upSide == Tile.SideType.StairUp) {
+            upSide = Tile.SideType.StairDown;
+        }
+        else if (upSide == Tile.SideType.StairDown) {
+            upSide = Tile.SideType.StairUp;
+        }
+
+        if (downSide == Tile.SideType.BeachUp) {
+            downSide = Tile.SideType.BeachDown;
+        }
+        else if (downSide == Tile.SideType.BeachDown) {
+            downSide = Tile.SideType.BeachUp;
+        }
+        else if (downSide == Tile.SideType.MountainUp) {
+            downSide = Tile.SideType.MountainDown;
+        }
+        else if (downSide == Tile.SideType.MountainDown) {
+            downSide = Tile.SideType.MountainUp;
+        }
+        else if (downSide == Tile.SideType.StairUp) {
+            downSide = Tile.SideType.StairDown;
+        }
+        else if (downSide == Tile.SideType.StairDown) {
+            downSide = Tile.SideType.StairUp;
+        }
+
+        if (leftSide == Tile.SideType.BeachUp) {
+            leftSide = Tile.SideType.BeachDown;
+        }
+        else if (leftSide == Tile.SideType.BeachDown) {
+            leftSide = Tile.SideType.BeachUp;
+        }
+        else if (leftSide == Tile.SideType.MountainUp) {
+            leftSide = Tile.SideType.MountainDown;
+        }
+        else if (leftSide == Tile.SideType.MountainDown) {
+            leftSide = Tile.SideType.MountainUp;
+        }
+        else if (leftSide == Tile.SideType.StairUp) {
+            leftSide = Tile.SideType.StairDown;
+        }
+        else if (leftSide == Tile.SideType.StairDown) {
+            leftSide = Tile.SideType.StairUp;
+        }
+
+        if (rightSide == Tile.SideType.BeachUp) {
+            rightSide = Tile.SideType.BeachDown;
+        }
+        else if (rightSide == Tile.SideType.BeachDown) {
+            rightSide = Tile.SideType.BeachUp;
+        }
+        else if (rightSide == Tile.SideType.MountainUp) {
+            rightSide = Tile.SideType.MountainDown;
+        }
+        else if (rightSide == Tile.SideType.MountainDown) {
+            rightSide = Tile.SideType.MountainUp;
+        }
+        else if (rightSide == Tile.SideType.StairUp) {
+            rightSide = Tile.SideType.StairDown;
+        }
+        else if (rightSide == Tile.SideType.StairDown) {
+            rightSide = Tile.SideType.StairUp;
+        }
+
         float rot = 0f;
         for (int i = 0; i < 4; i++) {
             if ((tileUp == upSide || upSide == Tile.SideType.DNE)
             && (tileDown == downSide || downSide == Tile.SideType.DNE)
             && (tileLeft == leftSide || leftSide == Tile.SideType.DNE)
             && (tileRight == rightSide || rightSide == Tile.SideType.DNE)) {
+                print(coordinates[x, y].x + " " + coordinates[x, y].y);
+                print(tileUp + " " + upSide);
+                print(tileDown + " " + downSide);
+                print(tileLeft + " " + leftSide);
+                print(tileRight + " " + upSide);
                 print(rot);
                 return rot;
             }
             // Rotate
             rot += 90;
             Tile.SideType temp = tileUp;
-            tileUp = tileRight;
-            tileRight = tileDown;
-            tileDown = tileLeft;
-            tileLeft = temp;
+            tileUp = tileLeft;
+            tileLeft = tileDown;
+            tileDown = tileRight;
+            tileRight = temp;
         }
         
         return rot;
@@ -341,20 +428,94 @@ public class MapGenerator : MonoBehaviour
         Tile.SideType leftSide = Tile.SideType.DNE;
         Tile.SideType rightSide = Tile.SideType.DNE;
 
-        // Set Neighboring tile sides.
-
-
         if (y > 0 && tiles[x, y - 1] != null) {
             upSide = tiles[x, y - 1].gameObject.GetComponent<Tile>().downSide;
         }
         if (y < Mathf.RoundToInt(mapSize.y) - 1 && tiles[x, y + 1] != null) {
             downSide = tiles[x, y + 1].gameObject.GetComponent<Tile>().upSide;
         }
-        if (x > 0 && tiles[x-1, y] != null) {
+        if (x > 0 && tiles[x - 1, y] != null) {
             leftSide = tiles[x - 1, y].gameObject.GetComponent<Tile>().rightSide;
         }
         if (x < Mathf.RoundToInt(mapSize.x) - 1 && tiles[x + 1, y] != null) {
             rightSide = tiles[x + 1, y].gameObject.GetComponent<Tile>().leftSide;
+        }
+
+        // Set Neighboring tile sides.
+        if (upSide == Tile.SideType.BeachUp) {
+            upSide = Tile.SideType.BeachDown;
+        }
+        else if (upSide == Tile.SideType.BeachDown) {
+            upSide = Tile.SideType.BeachUp;
+        }
+        else if (upSide == Tile.SideType.MountainUp) {
+            upSide = Tile.SideType.MountainDown;
+        }
+        else if (upSide == Tile.SideType.MountainDown) {
+            upSide = Tile.SideType.MountainUp;
+        }
+        else if (upSide == Tile.SideType.StairUp) {
+            upSide = Tile.SideType.StairDown;
+        }
+        else if (upSide == Tile.SideType.StairDown) {
+            upSide = Tile.SideType.StairUp;
+        }
+
+        if (downSide == Tile.SideType.BeachUp) {
+            downSide = Tile.SideType.BeachDown;
+        }
+        else if (downSide == Tile.SideType.BeachDown) {
+            downSide = Tile.SideType.BeachUp;
+        }
+        else if (downSide == Tile.SideType.MountainUp) {
+            downSide = Tile.SideType.MountainDown;
+        }
+        else if (downSide == Tile.SideType.MountainDown) {
+            downSide = Tile.SideType.MountainUp;
+        }
+        else if (downSide == Tile.SideType.StairUp) {
+            downSide = Tile.SideType.StairDown;
+        }
+        else if (downSide == Tile.SideType.StairDown) {
+            downSide = Tile.SideType.StairUp;
+        }
+
+        if (leftSide == Tile.SideType.BeachUp) {
+            leftSide = Tile.SideType.BeachDown;
+        }
+        else if (leftSide == Tile.SideType.BeachDown) {
+            leftSide = Tile.SideType.BeachUp;
+        }
+        else if (leftSide == Tile.SideType.MountainUp) {
+            leftSide = Tile.SideType.MountainDown;
+        }
+        else if (leftSide == Tile.SideType.MountainDown) {
+            leftSide = Tile.SideType.MountainUp;
+        }
+        else if (leftSide == Tile.SideType.StairUp) {
+            leftSide = Tile.SideType.StairDown;
+        }
+        else if (leftSide == Tile.SideType.StairDown) {
+            leftSide = Tile.SideType.StairUp;
+        }
+
+        if (rightSide == Tile.SideType.BeachUp) {
+            rightSide = Tile.SideType.BeachDown;
+        }
+        else if (rightSide == Tile.SideType.BeachDown) {
+            rightSide = Tile.SideType.BeachUp;
+        }
+        else if (rightSide == Tile.SideType.MountainUp) {
+            rightSide = Tile.SideType.MountainDown;
+        }
+        else if (rightSide == Tile.SideType.MountainDown) {
+            rightSide = Tile.SideType.MountainUp;
+        }
+        else if (rightSide == Tile.SideType.StairUp) {
+            rightSide = Tile.SideType.StairDown;
+        }
+        else if (rightSide == Tile.SideType.StairDown) {
+            rightSide = Tile.SideType.StairUp;
         }
 
         for (int i = 0; i < 4; i++) {
@@ -366,10 +527,10 @@ public class MapGenerator : MonoBehaviour
             }
             // Rotate
             Tile.SideType temp = tileUp;
-            tileUp = tileRight;
-            tileRight = tileDown;
-            tileDown = tileLeft;
-            tileLeft = temp;
+            tileUp = tileLeft;
+            tileLeft = tileDown;
+            tileDown = tileRight;
+            tileRight = temp;
         }
 
         return false;
