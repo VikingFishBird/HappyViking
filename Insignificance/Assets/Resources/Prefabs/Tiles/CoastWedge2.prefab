@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7726073907238347523}
   - component: {fileID: 3791987965886047323}
+  - component: {fileID: 8436164705003913184}
   m_Layer: 0
   m_Name: CoastWedge2
   m_TagString: Untagged
@@ -52,6 +53,19 @@ MonoBehaviour:
   tileLevel: 0
   Mountain: 0
   CoastOrWater: 1
+--- !u!65 &8436164705003913184
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4541556417182911389}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &6250458318579735600
 PrefabInstance:
   m_ObjectHideFlags: 0

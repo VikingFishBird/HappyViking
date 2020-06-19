@@ -157,7 +157,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -268.9, y: 67.4}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &171046262
@@ -699,7 +699,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -756,7 +756,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1495859647
 RectTransform:
   m_ObjectHideFlags: 0
@@ -870,11 +870,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapSize: {x: 40, y: 40}
+  noiseMapScale: 16
   waterTile: {fileID: 3534400398522354784, guid: a4c13fe9c1df59e4792111d6f5313b9a,
     type: 3}
   landTile: {fileID: 8137103259800632613, guid: 2fbe1057816e2f140bfc42d7632f05c4,
     type: 3}
-  noiseMapScale: 16
+  MountainStair: {fileID: 1261004995051235624, guid: 0905f599cdc40a44f8ccbbd426d0f82a,
+    type: 3}
+  MountainEndStair: {fileID: 888237845460727534, guid: d78dea15ea7a2984c9d2eb006f20523b,
+    type: 3}
+  StairCorner: {fileID: 5330064560969517723, guid: 0f202a1dfe4b3f94db6344d75163db2f,
+    type: 3}
+  StairWedge: {fileID: 3451422084192354043, guid: cd06b9afca809b34da1177dc3f143f27,
+    type: 3}
+  MTS: {fileID: 653248463258861258, guid: f044dd639eedc3f4fa9f9cd3a1bfebe2, type: 3}
+  STM: {fileID: 7027628701618737433, guid: a859733bbb24f81499b0cd6134162bba, type: 3}
+  MTSCorner: {fileID: 9108575614721080225, guid: 05e180434b9de7b42a8e9690586e1a48,
+    type: 3}
+  STMCorner: {fileID: 3534120285032012813, guid: b5f13c30d1fdd0645b89b12605b71310,
+    type: 3}
+  MTSWedge: {fileID: 6428229944414348652, guid: 0aefeb4a36d6dd642977f06384143114,
+    type: 3}
+  STMWedge: {fileID: 258851465406408357, guid: 6b7ad87b1951ca64a9d4c47391c0584f, type: 3}
+  Corner: {fileID: 6190039296782238100, guid: bb7f04d7c69595840bb3b211f68dfe95, type: 3}
+  CornerPath: {fileID: 2212002148804313696, guid: 22c3c805407de45429b9e349aabbcc12,
+    type: 3}
+  DubWedge: {fileID: 5919305710802843024, guid: ebee570de4fdaf64d8b36ae446b742f3,
+    type: 3}
+  DubWedgePath: {fileID: 8853275349298393840, guid: 72fe12377dfb42448abd982f790703a0,
+    type: 3}
+  MountainEnd: {fileID: 2263447981323223247, guid: 0d73654a937b9aa4ca8404ed4a7343c5,
+    type: 3}
+  QuadWedge: {fileID: 6466211049023884947, guid: 4f17afa39f405154ca25f96bac2069eb,
+    type: 3}
+  TripleWedge: {fileID: 7718989028467552071, guid: d8ab272175116cf49b8a3adf7c8825c7,
+    type: 3}
+  Peak: {fileID: 8796779287522930354, guid: 43e6f3cc311312347a96eaa9e45dc6ad, type: 3}
+  MountainSide: {fileID: 448752586486703690, guid: 975294290d1c01444a5063ca4ea67234,
+    type: 3}
+  MountainPath: {fileID: 4832742389505790878, guid: 82413a7fa20dd1f42b1afab9ea2c0f9b,
+    type: 3}
+  MountainWedge: {fileID: 8701983496443705688, guid: e0f5c9ef27b7107499908e9162513e53,
+    type: 3}
 --- !u!4 &1664678916
 Transform:
   m_ObjectHideFlags: 0
@@ -922,7 +959,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

@@ -51,6 +51,8 @@ MonoBehaviour:
   tileWeight: 0
   tileLevel: 2
   Mountain: 1
+  CoastOrWater: 0
+  Stair: 0
 --- !u!1001 &3225650932110216842
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -86,12 +88,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: f74759615a9982e4fa6353a95dc907f2,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f74759615a9982e4fa6353a95dc907f2,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7071067
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f74759615a9982e4fa6353a95dc907f2,
         type: 3}
@@ -101,7 +103,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: f74759615a9982e4fa6353a95dc907f2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f74759615a9982e4fa6353a95dc907f2,
         type: 3}

@@ -19,5 +19,6 @@ public class Tile : MonoBehaviour
 
     public bool Mountain;
     public bool CoastOrWater;
-
+    public bool Stair;
+    public bool Land;
 }

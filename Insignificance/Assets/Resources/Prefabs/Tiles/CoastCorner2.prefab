@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7925408256444403664}
   - component: {fileID: 1925605993059633576}
+  - component: {fileID: 5814352602328829359}
   m_Layer: 0
   m_Name: CoastCorner2
   m_TagString: Untagged
@@ -52,6 +53,19 @@ MonoBehaviour:
   tileLevel: 0
   Mountain: 0
   CoastOrWater: 1
+--- !u!65 &5814352602328829359
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2600246964284110499}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &100991856790159305
 PrefabInstance:
   m_ObjectHideFlags: 0
