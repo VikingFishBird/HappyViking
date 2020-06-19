@@ -428,6 +428,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -500,6 +501,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44c56bacf85065b40a9c8fad9b6e8a12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  map: {fileID: 1664678914}
 --- !u!1 &975549671
 GameObject:
   m_ObjectHideFlags: 0
@@ -871,6 +885,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapSize: {x: 40, y: 40}
   noiseMapScale: 16
+  fallOffMapPower: 7
   waterTile: {fileID: 3534400398522354784, guid: a4c13fe9c1df59e4792111d6f5313b9a,
     type: 3}
   landTile: {fileID: 8137103259800632613, guid: 2fbe1057816e2f140bfc42d7632f05c4,
@@ -911,6 +926,17 @@ MonoBehaviour:
   MountainPath: {fileID: 4832742389505790878, guid: 82413a7fa20dd1f42b1afab9ea2c0f9b,
     type: 3}
   MountainWedge: {fileID: 8701983496443705688, guid: e0f5c9ef27b7107499908e9162513e53,
+    type: 3}
+  STMTS: {fileID: 1085902245848608111, guid: 3ee0231f23f17b04686a26f3124ae8c0, type: 3}
+  STMDoubleMountain: {fileID: 1615849196585559195, guid: 5c1ae4bcbf196cb41a4097ed8e879897,
+    type: 3}
+  MTSDoubleMountain: {fileID: 4866899561629196460, guid: 88d4cf18fa9f5674eba0af09c4b0b84e,
+    type: 3}
+  WedgeToPath: {fileID: 7846065947957905121, guid: 21c72dbce6bb07949ba9fcf3a5ba1608,
+    type: 3}
+  PathToWedge: {fileID: 6791279094755084628, guid: f73515761fce51449b378d59183e9cbb,
+    type: 3}
+  MirrorWedge: {fileID: 5751110116141364052, guid: 48f0d82c2e63cf74db6df8ef387cda5b,
     type: 3}
 --- !u!4 &1664678916
 Transform:

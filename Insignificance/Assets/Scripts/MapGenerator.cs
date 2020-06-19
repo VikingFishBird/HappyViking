@@ -7,6 +7,7 @@ public class MapGenerator : MonoBehaviour
 {
     public Vector2 mapSize;
     public float noiseMapScale;
+    public float fallOffMapPower;
 
     public Transform waterTile;
     public Transform landTile;
@@ -33,6 +34,12 @@ public class MapGenerator : MonoBehaviour
     public Transform MountainSide;
     public Transform MountainPath;
     public Transform MountainWedge;
+    public Transform STMTS;
+    public Transform STMDoubleMountain;
+    public Transform MTSDoubleMountain;
+    public Transform WedgeToPath;
+    public Transform PathToWedge;
+    public Transform MirrorWedge;
 
 
 
@@ -41,13 +48,13 @@ public class MapGenerator : MonoBehaviour
     public Coord[,] coordinates;
 
     List<Compatability>[,] coefficientMatrix;
-    Transform[,] tiles;
+    public Transform[,] tiles;
     static GameObject[] tileList;
 
     bool fullyCollapsed;
 
     // Mountain Arrays [height, x, y]
-    Transform[,,] heightMapArrays;
+    public Transform[,,] heightMapArrays;
 
     // Start is called before the first frame update
     void Start()
@@ -75,7 +82,7 @@ public class MapGenerator : MonoBehaviour
         coefficientMatrix = new List<Compatability>[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         tiles = new Transform[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
 
-        heightMapArrays = new Transform[4, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
+        heightMapArrays = new Transform[5, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
 
         // Set coordinates array values
         for (int x = 0; x < mapSize.x; x++) {
@@ -113,7 +120,7 @@ public class MapGenerator : MonoBehaviour
             fullyCollapsed = CheckIfCollapsed();
             // Prevent Endless Loop
             count++;
-            if(count > 10000) {
+            if(count > 30000) {
                 break;
             }
         }
@@ -123,30 +130,23 @@ public class MapGenerator : MonoBehaviour
         // Mountains \\
         // Iterate through each level
         for(int i = 0; i < heightMapArrays.GetLength(0); i++) {
-            string mappyThingString = "";
-            for (int x = 0; x < heightMapArrays.GetLength(1); x++) {
-                for (int y = 0; y < heightMapArrays.GetLength(2); y++) {
-                    if (heightMapArrays[i, x, y] == null)
-                        mappyThingString += "N ";
-                    else
-                        mappyThingString += "M ";
-                }
-                mappyThingString += '\n';
-            }
-
-            print(mappyThingString);
             // Place Stairs
             PlaceStairCubes(heightMapArrays, i + 2, i);
             // Place Stair-dependent tiles
             bool changes = true;
             count = 0;
-            while(changes && count < 1) {
+            while(changes) {
                 changes = PlaceMTSCubes(heightMapArrays, i + 2, i);
                 count++;
             }
+
             // Place Non Stair-Dependent Tiles
             changes = true;
-            changes = PlaceRemainingMountain(heightMapArrays, i + 2, i);
+            count = 0;
+            while (changes) {
+                changes = PlaceRemainingMountain(heightMapArrays, i + 2, i);
+                count++;
+            }
         }
     }
     
@@ -278,13 +278,17 @@ public class MapGenerator : MonoBehaviour
                 tileDown = DubWedge.GetComponent<Tile>().downSide;
                 tileLeft = DubWedge.GetComponent<Tile>().leftSide;
                 tileRight = DubWedge.GetComponent<Tile>().rightSide;
-
+                // DubWedge Only
+                Tile.SideType tileUpDubWedge = Tile.SideType.Land;
+                Tile.SideType tileDownDubWedge = Tile.SideType.Land;
+                Tile.SideType tileLeftDubWedge = Tile.SideType.MountainUp;
+                Tile.SideType tileRightDubWedge = Tile.SideType.MountainDown;
                 rot = 0f;
                 for (int i = 0; i < 4; i++) {
-                    if ((tileUp == upSide)
-                    && (tileDown == downSide)
-                    && (tileLeft == leftSide)
-                    && (tileRight == rightSide)) {
+                    if ((tileUp == upSide || upSide == tileUpDubWedge)
+                    && (tileDown == downSide || downSide == tileDownDubWedge)
+                    && (tileLeft == leftSide || leftSide == tileLeftDubWedge)
+                    && (tileRight == rightSide || rightSide == tileRightDubWedge)) {
                         Destroy(heightLevel[index, x, y].gameObject);
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, DubWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
@@ -297,6 +301,12 @@ public class MapGenerator : MonoBehaviour
                     tileLeft = tileDown;
                     tileDown = tileRight;
                     tileRight = temp;
+
+                    temp = tileUpDubWedge;
+                    tileUpDubWedge = tileLeftDubWedge;
+                    tileLeftDubWedge = tileDownDubWedge;
+                    tileDownDubWedge = tileRightDubWedge;
+                    tileRightDubWedge = temp;
                 }
                 // DubWedgePath:
                 tileUp = DubWedgePath.GetComponent<Tile>().upSide;
@@ -329,12 +339,17 @@ public class MapGenerator : MonoBehaviour
                 tileLeft = MountainEnd.GetComponent<Tile>().leftSide;
                 tileRight = MountainEnd.GetComponent<Tile>().rightSide;
 
+                Tile.SideType tileUpMEnd = Tile.SideType.Air;
+                Tile.SideType tileDownMEnd = Tile.SideType.Air;
+                Tile.SideType tileLeftMEnd = Tile.SideType.Air;
+                Tile.SideType tileRightMEnd = Tile.SideType.Land;
+
                 rot = 0f;
                 for (int i = 0; i < 4; i++) {
-                    if ((tileUp == upSide)
-                    && (tileDown == downSide)
-                    && (tileLeft == leftSide)
-                    && (tileRight == rightSide)) {
+                    if ((tileUp == upSide || upSide == tileUpMEnd)
+                    && (tileDown == downSide || downSide == tileDownMEnd)
+                    && (tileLeft == leftSide || leftSide == tileLeftMEnd)
+                    && (tileRight == rightSide || rightSide == tileRightMEnd)) {
                         Destroy(heightLevel[index, x, y].gameObject);
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainEnd, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
@@ -347,6 +362,12 @@ public class MapGenerator : MonoBehaviour
                     tileLeft = tileDown;
                     tileDown = tileRight;
                     tileRight = temp;
+
+                    temp = tileUpMEnd;
+                    tileUpMEnd = tileLeftMEnd;
+                    tileLeftMEnd = tileDownMEnd;
+                    tileDownMEnd = tileRightMEnd;
+                    tileRightMEnd = temp;
                 }
                 // QuadWedge:
                 tileUp = QuadWedge.GetComponent<Tile>().upSide;
@@ -423,18 +444,95 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+                // PathToWedge: 
+                tileUp = PathToWedge.GetComponent<Tile>().upSide;
+                tileDown = PathToWedge.GetComponent<Tile>().downSide;
+                tileLeft = PathToWedge.GetComponent<Tile>().leftSide;
+                tileRight = PathToWedge.GetComponent<Tile>().rightSide;
+
+                Tile.SideType tileUpPTW = Tile.SideType.Land;
+                Tile.SideType tileDownPTW = Tile.SideType.DoubleMountain;
+                Tile.SideType tileLeftPTW = Tile.SideType.Air;
+                Tile.SideType tileRightPTW = Tile.SideType.MountainDown;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide || upSide == tileUpPTW)
+                    && (tileDown == downSide || downSide == tileDownPTW)
+                    && (tileLeft == leftSide || leftSide == tileLeftPTW)
+                    && (tileRight == rightSide || rightSide == tileRightPTW)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, PathToWedge, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+
+                    temp = tileUpPTW;
+                    tileUpPTW = tileLeftPTW;
+                    tileLeftPTW = tileDownPTW;
+                    tileDownPTW = tileRightPTW;
+                    tileRightPTW = temp;
+                }
+                // WedgeToPath: 
+                tileUp = WedgeToPath.GetComponent<Tile>().upSide;
+                tileDown = WedgeToPath.GetComponent<Tile>().downSide;
+                tileLeft = WedgeToPath.GetComponent<Tile>().leftSide;
+                tileRight = WedgeToPath.GetComponent<Tile>().rightSide;
+
+                Tile.SideType tileUpWTP = Tile.SideType.Land;
+                Tile.SideType tileDownWTP = Tile.SideType.DoubleMountain;
+                Tile.SideType tileLeftWTP = Tile.SideType.MountainUp;
+                Tile.SideType tileRightWTP = Tile.SideType.Air;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide || upSide == tileUpWTP)
+                    && (tileDown == downSide || downSide == tileDownWTP)
+                    && (tileLeft == leftSide || leftSide == tileLeftWTP)
+                    && (tileRight == rightSide || rightSide == tileRightWTP)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, WedgeToPath, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                    
+                    temp = tileUpWTP;
+                    tileUpWTP = tileLeftWTP;
+                    tileLeftWTP = tileDownWTP;
+                    tileDownWTP = tileRightWTP;
+                    tileRightWTP = temp;
+                }
                 // MountainSide: 
                 tileUp = MountainSide.GetComponent<Tile>().upSide;
                 tileDown = MountainSide.GetComponent<Tile>().downSide;
                 tileLeft = MountainSide.GetComponent<Tile>().leftSide;
                 tileRight = MountainSide.GetComponent<Tile>().rightSide;
 
+                Tile.SideType tileUpSide = Tile.SideType.Land;
+                Tile.SideType tileDownSide = Tile.SideType.Air;
+                Tile.SideType tileLeftSide = Tile.SideType.Land;
+                Tile.SideType tileRightSide = Tile.SideType.Land;
+
                 rot = 0f;
                 for (int i = 0; i < 4; i++) {
-                    if ((tileUp == upSide)
-                    && (tileDown == downSide)
-                    && (tileLeft == leftSide)
-                    && (tileRight == rightSide)) {
+                    if ((tileUp == upSide || upSide == tileUpSide)
+                    && (tileDown == downSide || downSide == tileDownSide)
+                    && (tileLeft == leftSide || leftSide == tileLeftSide)
+                    && (tileRight == rightSide || rightSide == tileRightSide)) {
                         Destroy(heightLevel[index, x, y].gameObject);
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainSide, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
@@ -447,6 +545,12 @@ public class MapGenerator : MonoBehaviour
                     tileLeft = tileDown;
                     tileDown = tileRight;
                     tileRight = temp;
+
+                    temp = tileUpSide;
+                    tileUpSide = tileLeftSide;
+                    tileLeftSide = tileDownSide;
+                    tileDownSide = tileRightSide;
+                    tileRightSide = temp;
                 }
                 // MountainPath: 
                 tileUp = MountainPath.GetComponent<Tile>().upSide;
@@ -481,16 +585,265 @@ public class MapGenerator : MonoBehaviour
 
                 rot = 0f;
                 for (int i = 0; i < 4; i++) {
-                    print((tileUp == upSide)
-                    && (tileDown == downSide)
-                    && (tileLeft == leftSide)
-                    && (tileRight == rightSide));
                     if ((tileUp == upSide)
                     && (tileDown == downSide)
                     && (tileLeft == leftSide)
                     && (tileRight == rightSide)) {
                         Destroy(heightLevel[index, x, y].gameObject);
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainWedge, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+                // STMTS: 
+                tileUp = STMTS.GetComponent<Tile>().upSide;
+                tileDown = STMTS.GetComponent<Tile>().downSide;
+                tileLeft = STMTS.GetComponent<Tile>().leftSide;
+                tileRight = STMTS.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMTS, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+
+                // STMDubMount: 
+                tileUp = STMDoubleMountain.GetComponent<Tile>().upSide;
+                tileDown = STMDoubleMountain.GetComponent<Tile>().downSide;
+                tileLeft = STMDoubleMountain.GetComponent<Tile>().leftSide;
+                tileRight = STMDoubleMountain.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMDoubleMountain, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+
+                // MTSDubMount: 
+                tileUp = MTSDoubleMountain.GetComponent<Tile>().upSide;
+                tileDown = MTSDoubleMountain.GetComponent<Tile>().downSide;
+                tileLeft = MTSDoubleMountain.GetComponent<Tile>().leftSide;
+                tileRight = MTSDoubleMountain.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTSDoubleMountain, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+
+                // STMWedge: 
+                tileUp = STMWedge.GetComponent<Tile>().upSide;
+                tileDown = STMWedge.GetComponent<Tile>().downSide;
+                tileLeft = STMWedge.GetComponent<Tile>().leftSide;
+                tileRight = STMWedge.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMWedge, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+                // MTSWedge: 
+                tileUp = MTSWedge.GetComponent<Tile>().upSide;
+                tileDown = MTSWedge.GetComponent<Tile>().downSide;
+                tileLeft = MTSWedge.GetComponent<Tile>().leftSide;
+                tileRight = MTSWedge.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTSWedge, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+                // MTS: 
+                tileUp = MTS.GetComponent<Tile>().upSide;
+                tileDown = MTS.GetComponent<Tile>().downSide;
+                tileLeft = MTS.GetComponent<Tile>().leftSide;
+                tileRight = MTS.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTS, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+                // STM: 
+                tileUp = STM.GetComponent<Tile>().upSide;
+                tileDown = STM.GetComponent<Tile>().downSide;
+                tileLeft = STM.GetComponent<Tile>().leftSide;
+                tileRight = STM.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STM, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+                // MTSCorner: 
+                tileUp = MTSCorner.GetComponent<Tile>().upSide;
+                tileDown = MTSCorner.GetComponent<Tile>().downSide;
+                tileLeft = MTSCorner.GetComponent<Tile>().leftSide;
+                tileRight = MTSCorner.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTSCorner, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+                // STMCorner: 
+                tileUp = STMCorner.GetComponent<Tile>().upSide;
+                tileDown = STMCorner.GetComponent<Tile>().downSide;
+                tileLeft = STMCorner.GetComponent<Tile>().leftSide;
+                tileRight = STMCorner.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMCorner, rot, x, y, false);
+                        heightLevel[index, x, y] = tiles[x, y];
+                        changes = true;
+                    }
+                    // Rotate
+                    rot += 90f;
+                    Tile.SideType temp = tileUp;
+                    tileUp = tileLeft;
+                    tileLeft = tileDown;
+                    tileDown = tileRight;
+                    tileRight = temp;
+                }
+                // MirrorWedge: 
+                tileUp = MirrorWedge.GetComponent<Tile>().upSide;
+                tileDown = MirrorWedge.GetComponent<Tile>().downSide;
+                tileLeft = MirrorWedge.GetComponent<Tile>().leftSide;
+                tileRight = MirrorWedge.GetComponent<Tile>().rightSide;
+
+                rot = 0f;
+                for (int i = 0; i < 4; i++) {
+                    if ((tileUp == upSide)
+                    && (tileDown == downSide)
+                    && (tileLeft == leftSide)
+                    && (tileRight == rightSide)) {
+                        Destroy(heightLevel[index, x, y].gameObject);
+                        tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MirrorWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
                     }
@@ -875,7 +1228,7 @@ public class MapGenerator : MonoBehaviour
                     && (tileDown == downSide)
                     && (tileLeft == leftSide)
                     && (tileRight == rightSide)) {
-                        if (Random.Range(0.0f, 1.0f) < 0.75f) {
+                        if (Random.Range(0.0f, 1.0f) < 0.15f) {
                             Destroy(heightLevel[index,x, y].gameObject);
                             tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainStair, rot, x, y, false);
                             heightLevel[index, x, y] = tiles[x, y];
@@ -1114,6 +1467,8 @@ public class MapGenerator : MonoBehaviour
         float halfWidth = mapSize.x / 2f;
         float halfHeight = mapSize.y / 2f;
 
+        float[,] falloff = GenerateFalloffMap();
+
         for (int x = 0; x < mapSize.x; x++) {
 
             for (int y = 0; y < mapSize.y; y++) {
@@ -1121,8 +1476,8 @@ public class MapGenerator : MonoBehaviour
                 float sampleY = (y - halfWidth + offSetY) / scale;
 
                 float perlinValue = Mathf.Clamp(Mathf.PerlinNoise(sampleX, sampleY), 0, 1);
-                
-                noiseMap[x, y] = perlinValue;
+
+                noiseMap[x, y] = Mathf.Clamp01(perlinValue - falloff[x,y]);
             }
         }
 
@@ -1130,20 +1485,46 @@ public class MapGenerator : MonoBehaviour
 
     }
 
+    // Create Falloff Map
+    private float[,] GenerateFalloffMap() {
+        float[,] map = new float[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
+
+        for(int i = 0; i < map.GetLength(0); i++) {
+            for (int j = 0; j < map.GetLength(1); j++) {
+                float x = i / mapSize.x * 2 - 1;
+                float y = j / mapSize.y * 2 - 1;
+
+                float val = Mathf.Max(Mathf.Abs(x), Mathf.Abs(y));
+                map[i,j] = EvalWithCurve(val);
+            }
+        }
+
+        return map;
+    }
+
+
+    private float EvalWithCurve(float val) {
+        float a = 3;
+        float b = fallOffMapPower;
+
+        return Mathf.Pow(val, a) / (Mathf.Pow(val, a) + Mathf.Pow(b-b*val, a));
+    }
     // Adjust Values in method for mountain perlin heights.
     private int GetHeightLevelFromPerlin(float val) {
         if (val <= 0.25f)
             return 0;
         else if (val <= 0.65f)
             return 1;
-        else if (val <= 0.83f)
+        else if (val <= 0.73f)
             return 2;
-        else if (val <= 0.90f)
+        else if (val <= 0.83f)
             return 3;
-        else if (val <= 0.96f)
+        else if (val <= 0.88f)
             return 4;
-        else
+        else if (val <= 0.94f)
             return 5;
+        else
+            return 6;
     }
 
     // Places HeightMapCubes ||| Need to change mountains.
@@ -1291,6 +1672,21 @@ public class MapGenerator : MonoBehaviour
         }
         print("Could not find tile: " + name);
         return 0;
+    }
+
+    // Unused but could be useful.
+    public void GetIndexFromCoordinates(float xCoord, float yCoord, out int x, out int y) {
+        x = 0;
+        y = 0;
+        for (int i = 0; i < coordinates.GetLength(0); i++) {
+            for (int j = 0; j < coordinates.GetLength(1); j++) {
+                if(xCoord == coordinates[i,j].x && yCoord == coordinates[i, j].y) {
+                    x = i;
+                    y = j;
+                }
+            }
+        }
+        
     }
 
     // Stores the data for each match in the Coefficient Matrix.

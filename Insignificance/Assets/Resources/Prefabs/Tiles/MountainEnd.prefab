@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2263447981323223247}
   - component: {fileID: -6578812053951626440}
+  - component: {fileID: -8094418618861769506}
   m_Layer: 0
   m_Name: MountainEnd
   m_TagString: Untagged
@@ -44,15 +45,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fba227a03ea9db24fb07d118b115d418, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  upSide: 7
+  upSide: 4
   leftSide: 4
   downSide: 4
-  rightSide: 4
+  rightSide: 7
   tileWeight: 0
   tileLevel: 2
   Mountain: 1
   CoastOrWater: 0
   Stair: 0
+  Land: 0
+--- !u!65 &-8094418618861769506
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8529907828067140875}
+  m_Material: {fileID: 13400000, guid: 59904e310c70a8c4387394b8ab49b0a4, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &1292721674428656701
 PrefabInstance:
   m_ObjectHideFlags: 0
