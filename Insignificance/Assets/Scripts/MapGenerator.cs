@@ -41,7 +41,7 @@ public class MapGenerator : MonoBehaviour
     public Transform PathToWedge;
     public Transform MirrorWedge;
 
-
+    enum Biome { };
 
     Transform mapHolder;
 
@@ -149,8 +149,38 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
+
+    private void TextureDaMap() {
+        Dictionary<Vector2, Biome> bioDic = new Dictionary<Vector2, Biome> {
+
+        };
+
+    }
     
-    public bool PlaceRemainingMountain(Transform[,,] heightLevel, int height, int index) {
+    private float EvalPrecipitation(float x) {
+        if(x < 0.25f) {
+            return 4 * x;
+        }
+        else if(x < 0.5f) {
+            return -4 * x + 2;
+        }
+        else if (x < 0.75f) {
+            return 4 * x - 2;
+        }
+        else {
+            return -4 * x + 4;
+        }
+    }
+    private float EvalTemperature(float x) {
+        if (x < 0.25f) {
+            return 2 * x;
+        }
+        else {
+            return -2 * x + 2;
+        }
+    }
+
+    private bool PlaceRemainingMountain(Transform[,,] heightLevel, int height, int index) {
         bool changes = false;
 
         for (int x = 0; x < heightLevel.GetLength(1); x++) {
@@ -862,7 +892,7 @@ public class MapGenerator : MonoBehaviour
         return changes;
     }
 
-    public bool PlaceMTSCubes(Transform[,,] heightLevel, int height, int index) {
+    private bool PlaceMTSCubes(Transform[,,] heightLevel, int height, int index) {
         bool changes = false;
 
         for (int x = 0; x < heightLevel.GetLength(1); x++) {
@@ -1189,7 +1219,7 @@ public class MapGenerator : MonoBehaviour
 
     }
 
-    public void PlaceStairCubes(Transform[,,] heightLevel, int height, int index) {
+    private void PlaceStairCubes(Transform[,,] heightLevel, int height, int index) {
         for(int x = 0; x < heightLevel.GetLength(1); x++) {
             for (int y = 0; y < heightLevel.GetLength(2); y++) {
                 if(heightLevel[index,x,y] == null) {
@@ -1273,7 +1303,7 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Finds which tile has the fewest valid potential tiles.
-    public void FindTileWithFewestPossibilities(out int minx, out int miny) {
+    private void FindTileWithFewestPossibilities(out int minx, out int miny) {
         int min = int.MaxValue;
         int xIndex = 0;
         int yIndex = 0;
@@ -1302,7 +1332,7 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Selects a random valid tile and places it.
-    public void SetTile(int x, int y) {
+    private void SetTile(int x, int y) {
         float sum = 0f;
         for(int i = 0; i < coefficientMatrix[x,y].Count; i++) {
             sum += tileList[coefficientMatrix[x, y][i].index].GetComponent<Tile>().tileWeight;
@@ -1321,7 +1351,7 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Sets the surrounding tiles (including kitty corners) to null and resets the surrounding co-matrices.
-    public void BackTrack(List<int> xZero, List<int> yZero) {
+    private void BackTrack(List<int> xZero, List<int> yZero) {
         // Future Optimization: ResetCoefficient Matrix at the end of method.
         // Future Optimization: Make this into a look to add the capability of adjusting the size of the backtrack.
         for(int i = 0; i < xZero.Count; i++) {
@@ -1388,7 +1418,7 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Resets the coefficient matrix of all tiles.
-    public void InstantiateCoeffecientMatrix() {
+    private void InstantiateCoeffecientMatrix() {
         for(int x = 0; x < coefficientMatrix.GetLength(0); x++) {
             for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
                 coefficientMatrix[x, y] = new List<Compatability>();
@@ -1402,7 +1432,7 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Resets the coefficient matrix of all surrounding tiles (but not the given one).
-    public void ResetCoeffecientMatrixSurroundingTile(int x, int y) {
+    private void ResetCoeffecientMatrixSurroundingTile(int x, int y) {
         if(x > 0) {
             if (tiles[x - 1, y] == null) {
                 coefficientMatrix[x - 1, y].Clear();
@@ -1439,7 +1469,7 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Resets the coefficient matrix at a given tile.
-    public void ResetCoeffecientMatrixAtTile(int x, int y) {
+    private void ResetCoeffecientMatrixAtTile(int x, int y) {
         coefficientMatrix[x, y].Clear();
         for (int i = 0; i < tileList.Length; i++) {
             CheckValid(coefficientMatrix[x, y], i, x, y);
@@ -1447,7 +1477,7 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Returns true if there are no gaps. False otherwise.
-    public bool CheckIfCollapsed() {
+    private bool CheckIfCollapsed() {
         for(int x = 0; x < tiles.GetLength(0); x++) {
             for (int y = 0; y < tiles.GetLength(1); y++) {
                 if(tiles[x,y] == null) {
@@ -1502,13 +1532,13 @@ public class MapGenerator : MonoBehaviour
         return map;
     }
 
-
     private float EvalWithCurve(float val) {
         float a = 3;
         float b = fallOffMapPower;
 
         return Mathf.Pow(val, a) / (Mathf.Pow(val, a) + Mathf.Pow(b-b*val, a));
     }
+    
     // Adjust Values in method for mountain perlin heights.
     private int GetHeightLevelFromPerlin(float val) {
         if (val <= 0.25f)
