@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
 
+// Optimize: Combine Meshes
 public class MapGenerator : MonoBehaviour
 {
     public Vector2 mapSize;
@@ -180,6 +181,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    // Optimize: Continue loop after true case.
     private bool PlaceRemainingMountain(Transform[,,] heightLevel, int height, int index) {
         bool changes = false;
 
