@@ -144,7 +144,7 @@ public class MapGenerator : MonoBehaviour
             // Place Non Stair-Dependent Tiles
             changes = true;
             count = 0;
-            while (changes) {
+            while (count < 20) {
                 changes = PlaceRemainingMountain(heightMapArrays, i + 2, i);
                 count++;
             }
