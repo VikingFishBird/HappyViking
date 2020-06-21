@@ -187,6 +187,10 @@ public class MapGenerator : MonoBehaviour
 
         for (int x = 0; x < heightLevel.GetLength(1); x++) {
             for (int y = 0; y < heightLevel.GetLength(2); y++) {
+
+                bool success = false;
+                
+
                 // If not mountain, continue.
                 if (heightLevel[index, x, y] == null) {
                     continue;
@@ -265,6 +269,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, Corner, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -280,6 +285,10 @@ public class MapGenerator : MonoBehaviour
                     tileDownCorner = tileRightCorner;
                     tileRightCorner = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // CornerPath: 
                 tileUp = CornerPath.GetComponent<Tile>().upSide;
                 tileDown = CornerPath.GetComponent<Tile>().downSide;
@@ -296,6 +305,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, CornerPath, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -305,6 +315,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // DubWedge: 
                 tileUp = DubWedge.GetComponent<Tile>().upSide;
                 tileDown = DubWedge.GetComponent<Tile>().downSide;
@@ -325,6 +339,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, DubWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -340,6 +355,10 @@ public class MapGenerator : MonoBehaviour
                     tileDownDubWedge = tileRightDubWedge;
                     tileRightDubWedge = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // DubWedgePath:
                 tileUp = DubWedgePath.GetComponent<Tile>().upSide;
                 tileDown = DubWedgePath.GetComponent<Tile>().downSide;
@@ -356,6 +375,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, DubWedgePath, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -365,6 +385,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // MountainEnd:
                 tileUp = MountainEnd.GetComponent<Tile>().upSide;
                 tileDown = MountainEnd.GetComponent<Tile>().downSide;
@@ -386,6 +410,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainEnd, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -401,6 +426,10 @@ public class MapGenerator : MonoBehaviour
                     tileDownMEnd = tileRightMEnd;
                     tileRightMEnd = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // QuadWedge:
                 tileUp = QuadWedge.GetComponent<Tile>().upSide;
                 tileDown = QuadWedge.GetComponent<Tile>().downSide;
@@ -417,6 +446,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, QuadWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -426,6 +456,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // TripleWedge: 
                 tileUp = TripleWedge.GetComponent<Tile>().upSide;
                 tileDown = TripleWedge.GetComponent<Tile>().downSide;
@@ -442,6 +476,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, TripleWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -451,6 +486,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // Peak: 
                 tileUp = Peak.GetComponent<Tile>().upSide;
                 tileDown = Peak.GetComponent<Tile>().downSide;
@@ -467,6 +506,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, Peak, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -476,6 +516,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // PathToWedge: 
                 tileUp = PathToWedge.GetComponent<Tile>().upSide;
                 tileDown = PathToWedge.GetComponent<Tile>().downSide;
@@ -497,6 +541,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, PathToWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -512,6 +557,10 @@ public class MapGenerator : MonoBehaviour
                     tileDownPTW = tileRightPTW;
                     tileRightPTW = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // WedgeToPath: 
                 tileUp = WedgeToPath.GetComponent<Tile>().upSide;
                 tileDown = WedgeToPath.GetComponent<Tile>().downSide;
@@ -533,6 +582,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, WedgeToPath, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -548,6 +598,10 @@ public class MapGenerator : MonoBehaviour
                     tileDownWTP = tileRightWTP;
                     tileRightWTP = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // MountainSide: 
                 tileUp = MountainSide.GetComponent<Tile>().upSide;
                 tileDown = MountainSide.GetComponent<Tile>().downSide;
@@ -569,6 +623,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainSide, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -584,6 +639,10 @@ public class MapGenerator : MonoBehaviour
                     tileDownSide = tileRightSide;
                     tileRightSide = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // MountainPath: 
                 tileUp = MountainPath.GetComponent<Tile>().upSide;
                 tileDown = MountainPath.GetComponent<Tile>().downSide;
@@ -600,6 +659,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainPath, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -609,6 +669,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // MountainWedge: 
                 tileUp = MountainWedge.GetComponent<Tile>().upSide;
                 tileDown = MountainWedge.GetComponent<Tile>().downSide;
@@ -625,6 +689,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -634,6 +699,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // STMTS: 
                 tileUp = STMTS.GetComponent<Tile>().upSide;
                 tileDown = STMTS.GetComponent<Tile>().downSide;
@@ -650,6 +719,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMTS, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -659,6 +729,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // STMDubMount: 
                 tileUp = STMDoubleMountain.GetComponent<Tile>().upSide;
@@ -676,6 +749,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMDoubleMountain, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -685,6 +759,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // MTSDubMount: 
                 tileUp = MTSDoubleMountain.GetComponent<Tile>().upSide;
@@ -702,6 +779,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTSDoubleMountain, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -711,6 +789,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // STMWedge: 
                 tileUp = STMWedge.GetComponent<Tile>().upSide;
@@ -728,6 +809,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -737,6 +819,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // MTSWedge: 
                 tileUp = MTSWedge.GetComponent<Tile>().upSide;
                 tileDown = MTSWedge.GetComponent<Tile>().downSide;
@@ -753,6 +839,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTSWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -762,6 +849,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // MTS: 
                 tileUp = MTS.GetComponent<Tile>().upSide;
                 tileDown = MTS.GetComponent<Tile>().downSide;
@@ -778,6 +869,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTS, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -787,6 +879,8 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+                if (success)
+                    continue;
                 // STM: 
                 tileUp = STM.GetComponent<Tile>().upSide;
                 tileDown = STM.GetComponent<Tile>().downSide;
@@ -803,6 +897,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STM, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -812,6 +907,8 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+                if (success)
+                    continue;
                 // MTSCorner: 
                 tileUp = MTSCorner.GetComponent<Tile>().upSide;
                 tileDown = MTSCorner.GetComponent<Tile>().downSide;
@@ -828,6 +925,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTSCorner, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -837,6 +935,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // STMCorner: 
                 tileUp = STMCorner.GetComponent<Tile>().upSide;
                 tileDown = STMCorner.GetComponent<Tile>().downSide;
@@ -853,6 +955,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMCorner, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -862,6 +965,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // MirrorWedge: 
                 tileUp = MirrorWedge.GetComponent<Tile>().upSide;
                 tileDown = MirrorWedge.GetComponent<Tile>().downSide;
@@ -878,6 +985,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MirrorWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -906,6 +1014,8 @@ public class MapGenerator : MonoBehaviour
                 if(!heightLevel[index, x, y].gameObject.GetComponent<Tile>().Land) {
                     continue;
                 }
+
+                bool success = false;
 
                 // Sides of neighboring tiles. Left = Left of current tile.
                 Tile.SideType upSide = Tile.SideType.Air;
@@ -996,6 +1106,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTS, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -1005,6 +1116,10 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
+
                 // STM: Bottom Air, Left Stair, Top Land, Right Land
                 tileUp = Tile.SideType.Land;
                 tileDown = Tile.SideType.Air;
@@ -1021,6 +1136,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STM, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -1030,6 +1146,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // MTS Corner: Bottom Air, Left Stair, Top Land, Right Land
                 tileUp = Tile.SideType.Land;
@@ -1047,6 +1166,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTSCorner, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -1056,6 +1176,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // STM Corner: Bottom Air, Left Stair, Top Land, Right Land
                 tileUp = Tile.SideType.Land;
@@ -1073,6 +1196,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMCorner, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -1082,6 +1206,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // MTSWedge
                 tileUp = Tile.SideType.Land;
@@ -1099,6 +1226,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MTSWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -1108,6 +1236,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // STM Wedge
                 tileUp = Tile.SideType.Land;
@@ -1125,6 +1256,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, STMWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -1134,6 +1266,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // Stair Corner
                 tileUp = Tile.SideType.StairDown;
@@ -1151,6 +1286,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, StairCorner, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -1160,6 +1296,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // Stair Wedge
                 tileUp = Tile.SideType.Land;
@@ -1177,6 +1316,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, StairWedge, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
@@ -1186,6 +1326,9 @@ public class MapGenerator : MonoBehaviour
                     tileDown = tileRight;
                     tileRight = temp;
                 }
+
+                if (success)
+                    continue;
 
                 // Stair
                 tileUp = Tile.SideType.Land;
@@ -1203,6 +1346,7 @@ public class MapGenerator : MonoBehaviour
                         tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height, MountainStair, rot, x, y, false);
                         heightLevel[index, x, y] = tiles[x, y];
                         changes = true;
+                        success = true;
                     }
                     // Rotate
                     rot += 90f;
