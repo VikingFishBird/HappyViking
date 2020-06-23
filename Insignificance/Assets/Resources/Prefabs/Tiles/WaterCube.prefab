@@ -16,7 +16,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &3534400398522354784
 Transform:
@@ -55,6 +55,7 @@ MonoBehaviour:
   CoastOrWater: 1
   Stair: 0
   Land: 0
+  MountainEdge: 0
 --- !u!65 &596528223902190584
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -84,7 +85,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &5106177732564275887
 Transform:

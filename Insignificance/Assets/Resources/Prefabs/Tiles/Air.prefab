@@ -15,7 +15,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &8791125899357248433
 Transform:
@@ -47,7 +47,7 @@ MonoBehaviour:
   leftSide: 4
   downSide: 4
   rightSide: 4
-  tileWeight: 5
+  tileWeight: 100
   tileLevel: 0
   Mountain: 1
   CoastOrWater: 0

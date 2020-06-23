@@ -165,7 +165,7 @@ public class MapGenerator : MonoBehaviour
                 // Set the specified tile
                 SetTile(i, minX, minY);
                 // Reset possibilities of surrounding tiles
-                ResetCoeffecientMatrixSurroundingTile(i, minX, minY);
+                ResetCoeffecientMatrixSurroundingTile(i, minX, minY, validMountain);
                 // Set Bool variable
                 fullyCollapsed = CheckIfCollapsed(i, validMountain);
                 // Prevent Endless Loop
@@ -224,7 +224,7 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < coefficientMatrix.GetLength(2); y++) {
                 if (mountValid[x,y] && tiles[height, x, y] == null) {
                     for (int i = 0; i < tileList.Length; i++) {
-                        CheckValid(coefficientMatrix[height, x, y], i, height, x, y);
+                        CheckValid(coefficientMatrix[height, x, y], i, height, x, y, mountValid);
                     }
                 }
             }
@@ -1862,12 +1862,12 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Resets the coefficient matrix of all surrounding tiles (but not the given one).
-    private void ResetCoeffecientMatrixSurroundingTile(int height, int x, int y) {
+    private void ResetCoeffecientMatrixSurroundingTile(int height, int x, int y, bool[,] mountValid = null) {
         if(x > 0) {
             if (tiles[height, x - 1, y] == null) {
                 coefficientMatrix[height, x - 1, y].Clear();
                 for (int i = 0; i < tileList.Length; i++) {
-                    CheckValid(coefficientMatrix[height, x - 1, y], i, height, x - 1, y);
+                    CheckValid(coefficientMatrix[height, x - 1, y], i, height, x - 1, y, mountValid);
                 }
             }
         }
@@ -1875,7 +1875,7 @@ public class MapGenerator : MonoBehaviour
             if (tiles[height, x + 1, y] == null) {
                 coefficientMatrix[height, x + 1, y].Clear();
                 for (int i = 0; i < tileList.Length; i++) {
-                    CheckValid(coefficientMatrix[height, x + 1, y], i, height, x + 1, y);
+                    CheckValid(coefficientMatrix[height, x + 1, y], i, height, x + 1, y, mountValid);
                 }
             }
         }
@@ -1883,7 +1883,7 @@ public class MapGenerator : MonoBehaviour
             if (tiles[height, x, y - 1] == null) {
                 coefficientMatrix[height, x, y - 1].Clear();
                 for (int i = 0; i < tileList.Length; i++) {
-                    CheckValid(coefficientMatrix[height, x, y - 1], i, height, x, y - 1);
+                    CheckValid(coefficientMatrix[height, x, y - 1], i, height, x, y - 1, mountValid);
                 }
             }
         }
@@ -1891,7 +1891,7 @@ public class MapGenerator : MonoBehaviour
             if (tiles[height, x, y + 1] == null) {
                 coefficientMatrix[height, x, y + 1].Clear();
                 for (int i = 0; i < tileList.Length; i++) {
-                    CheckValid(coefficientMatrix[height, x, y + 1], i, height, x, y + 1);
+                    CheckValid(coefficientMatrix[height, x, y + 1], i, height, x, y + 1, mountValid);
                 }
             }
         }
@@ -1899,10 +1899,10 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Resets the coefficient matrix at a given tile.
-    private void ResetCoeffecientMatrixAtTile(int height, int x, int y) {
+    private void ResetCoeffecientMatrixAtTile(int height, int x, int y, bool[,] mountValid = null) {
         coefficientMatrix[height, x, y].Clear();
         for (int i = 0; i < tileList.Length; i++) {
-            CheckValid(coefficientMatrix[height, x, y], i, height, x, y);
+            CheckValid(coefficientMatrix[height, x, y], i, height, x, y, mountValid);
         }
     }
 
@@ -2023,16 +2023,16 @@ public class MapGenerator : MonoBehaviour
     public Transform PlaceCubeAtCoord(Coord coord, Transform parent, int heightLevel, Transform tile, float rot, int x, int y, bool perlin) {
         Transform cubey = Instantiate(tile, new Vector3(coord.x, -0.5f + heightLevel, coord.y), Quaternion.Euler(new Vector3(0, rot, 0)));
 
+        Tile tileComp = cubey.GetComponent<Tile>();
         float i = 0f;
         while(i < rot) {
-            Tile.SideType temp = cubey.gameObject.GetComponent<Tile>().upSide;
-            cubey.gameObject.GetComponent<Tile>().upSide = cubey.gameObject.GetComponent<Tile>().leftSide;
-            cubey.gameObject.GetComponent<Tile>().leftSide = cubey.gameObject.GetComponent<Tile>().downSide;
-            cubey.gameObject.GetComponent<Tile>().downSide = cubey.gameObject.GetComponent<Tile>().rightSide;
-            cubey.gameObject.GetComponent<Tile>().rightSide = temp;
+            Tile.SideType temp = tileComp.upSide;
+            tileComp.upSide = tileComp.leftSide;
+            tileComp.leftSide = tileComp.downSide;
+            tileComp.downSide = tileComp.rightSide;
+            tileComp.rightSide = temp;
             i += 90f;
         }
-
         cubey.parent = parent;
         /*
         cubey.GetComponent<Tile>().tileLevel = heightLevel;
@@ -2056,7 +2056,7 @@ public class MapGenerator : MonoBehaviour
         // Raise Water Cubes
         if (heightLevel == 0) {
             cubey.localPosition = cubey.localPosition + Vector3.up;
-            cubey.GetComponent<Tile>().tileLevel = heightLevel + 1;
+            tileComp.tileLevel = heightLevel + 1;
         }
         return cubey;
     }

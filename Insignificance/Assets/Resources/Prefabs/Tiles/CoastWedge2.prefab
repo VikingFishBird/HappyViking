@@ -16,7 +16,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &7726073907238347523
 Transform:
@@ -55,6 +55,7 @@ MonoBehaviour:
   CoastOrWater: 1
   Stair: 0
   Land: 0
+  MountainEdge: 0
 --- !u!65 &8436164705003913184
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -149,6 +150,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CoastWedge2
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 338426ac9f57dff4f92c8f68178ce7ef,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 338426ac9f57dff4f92c8f68178ce7ef, type: 3}

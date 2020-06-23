@@ -16,7 +16,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &6909961666412436161
 Transform:
@@ -55,6 +55,7 @@ MonoBehaviour:
   CoastOrWater: 1
   Stair: 0
   Land: 0
+  MountainEdge: 0
 --- !u!65 &-8355875408724557046
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -149,6 +150,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CoastSide3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e46a927cb91558f4592e9afc6db04ff3,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e46a927cb91558f4592e9afc6db04ff3, type: 3}
