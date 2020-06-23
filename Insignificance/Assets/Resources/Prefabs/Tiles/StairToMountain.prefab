@@ -49,12 +49,13 @@ MonoBehaviour:
   leftSide: 8
   downSide: 4
   rightSide: 6
-  tileWeight: 0
+  tileWeight: 1
   tileLevel: 2
   Mountain: 1
   CoastOrWater: 0
   Stair: 0
   Land: 0
+  MountainEdge: 1
 --- !u!65 &1240006312145221845
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -17,6 +17,7 @@ public class ObjectClicker : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        /*
         if (Input.GetMouseButtonDown(0)) {
             heightMap = map.GetComponent<MapGenerator>().heightMapArrays;
             RaycastHit hit;
@@ -51,7 +52,7 @@ public class ObjectClicker : MonoBehaviour
                     }
                 }
             }
-        }
+        }*/
 
     }
 

@@ -48,12 +48,13 @@ MonoBehaviour:
   leftSide: 5
   downSide: 4
   rightSide: 4
-  tileWeight: 0
+  tileWeight: 1
   tileLevel: 0
   Mountain: 1
   CoastOrWater: 0
   Stair: 0
   Land: 0
+  MountainEdge: 1
 --- !u!1001 &5847873345940597259
 PrefabInstance:
   m_ObjectHideFlags: 0

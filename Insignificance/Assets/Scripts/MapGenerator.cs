@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
 
-// Optimize: Combine Meshes
+// Optimize: Combine Meshes, Create separate arrays for coastTileList and mtTileList
 public class MapGenerator : MonoBehaviour
 {
     public Vector2 mapSize;
@@ -44,18 +44,24 @@ public class MapGenerator : MonoBehaviour
 
     enum Biome { };
 
+    // The GameObject holding all the tiles.
     Transform mapHolder;
 
+    // Array of coordinates of tiles.
     public Coord[,] coordinates;
 
-    List<Compatability>[,] coefficientMatrix;
-    public Transform[,] tiles;
+    // Holds possible tiles.
+    List<Compatability>[,,] coefficientMatrix;
+    // Top cubes.
+    public Transform[,,] tiles;
+    // Prefab List
     static GameObject[] tileList;
 
+    // Boolean for the WFC completion.
     bool fullyCollapsed;
 
     // Mountain Arrays [height, x, y]
-    public Transform[,,] heightMapArrays;
+    //public Transform[,,] heightMapArrays;
 
     // Start is called before the first frame update
     void Start()
@@ -64,6 +70,7 @@ public class MapGenerator : MonoBehaviour
         tileList = Resources.LoadAll<GameObject>("Prefabs/Tiles");
         for(int i = 0; i < tileList.Length; i++) {
             PlaceCubeAtCoord(new Coord(i, 60), transform, 1, tileList[i].transform, 90, 0, 0, false);
+            print(tileList[i].transform.name);
         }
         // Initialize coordinates array.
         coordinates = new Coord[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
@@ -79,11 +86,14 @@ public class MapGenerator : MonoBehaviour
 
     // Generates a new map
     public void GenerateMap() {
-        // Instantiate the Coefficient Matrix
-        coefficientMatrix = new List<Compatability>[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
-        tiles = new Transform[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
+        // Instantiate the Coefficient Matrix / Arrays
+        coefficientMatrix = new List<Compatability>[6, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
+        tiles = new Transform[6, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
 
-        heightMapArrays = new Transform[5, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
+        //heightMapArrays = new Transform[5, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
+        
+        // Reset fully collapsed bool value.
+        fullyCollapsed = false;
 
         // Set coordinates array values
         for (int x = 0; x < mapSize.x; x++) {
@@ -112,11 +122,11 @@ public class MapGenerator : MonoBehaviour
         while (!fullyCollapsed) {
             int minx, miny;
             // Find the tile with the fewest possibilities
-            FindTileWithFewestPossibilities(out minx, out miny);
+            FindSeaLevelTileWithFewestPossibilities(out minx, out miny);
             // Set the specified tile
-            SetTile(minx, miny);
+            SetTile(0, minx, miny);
             // Reset possibilities of surrounding tiles
-            ResetCoeffecientMatrixSurroundingTile(minx, miny);
+            ResetCoeffecientMatrixSurroundingTile(0, minx, miny);
             // Set Bool variable
             fullyCollapsed = CheckIfCollapsed();
             // Prevent Endless Loop
@@ -125,10 +135,49 @@ public class MapGenerator : MonoBehaviour
                 break;
             }
         }
-        // Reset fully collapsed bool value.
-        fullyCollapsed = false;
+
 
         // Mountains \\
+        count = 0;
+        for(int i = 1; i < tiles.GetLength(0); i++) { // i = HeightLevel (mountains only)
+            // Find Valid Mountain tiles at level
+            bool[,] validMountain = FindValidMountainTiles(i);
+
+            // Set MountainCoefficientMatrix
+            SetMountainCoefficientMatrix(i, validMountain);
+
+            string coMatrixStr = "";
+            for(int y = 0; y < coefficientMatrix.GetLength(2); y++) {
+                for (int x = 0; x < coefficientMatrix.GetLength(1); x++) {
+                    coMatrixStr += coefficientMatrix[i, x, y].Count.ToString() + " ";
+                }
+                coMatrixStr += "\n";
+            }
+            print(coMatrixStr);
+
+            fullyCollapsed = false;
+            while (!fullyCollapsed) {
+                // Find the tile with the fewest possibilities
+                int minX, minY;
+                FindMountainTileWithFewestPossbilities(i, validMountain, out minX, out minY);
+                // Set the specified tile
+                SetTile(i, minX, minY);
+                // Reset possibilities of surrounding tiles
+                ResetCoeffecientMatrixSurroundingTile(i, minX, minY);
+                // Set Bool variable
+                fullyCollapsed = CheckIfCollapsed(i, validMountain);
+                // Prevent Endless Loop
+                count++;
+                if (count > 30000) {
+                    break;
+                }
+            }
+        }
+
+        fullyCollapsed = false;
+
+        #region OldCode
+        /*
         // Iterate through each level
         for(int i = 0; i < heightMapArrays.GetLength(0); i++) {
             // Place Stairs
@@ -148,9 +197,64 @@ public class MapGenerator : MonoBehaviour
                 changes = PlaceRemainingMountain(heightMapArrays, i + 2, i);
                 count++;
             }
-        }
+        }*/
+        #endregion
     }
 
+    #region Mountain WFC
+    // Initializes values of mountain coefficient matrix at height.
+    private void SetMountainCoefficientMatrix(int height, bool[,] mountValid) {
+        for (int x = 0; x < coefficientMatrix.GetLength(1); x++) {
+            for (int y = 0; y < coefficientMatrix.GetLength(2); y++) {
+                if (mountValid[x,y] && tiles[height, x, y] == null) {
+                    for (int i = 0; i < tileList.Length; i++) {
+                        CheckValid(coefficientMatrix[height, x, y], i, height, x, y);
+                    }
+                }
+            }
+        }
+    }
+    
+    // Returns a boolean array representing valid mountain placements.
+    // Tile is valid if tile below exists and is not water/coast/mountain edge. 
+    private bool[,] FindValidMountainTiles(int index) {
+        bool[,] valid = new bool[tiles.GetLength(1), tiles.GetLength(2)];
+
+        for (int x = 0; x < tiles.GetLength(1); x++) {
+            for (int y = 0; y < tiles.GetLength(2); y++) {
+                if (tiles[index - 1, x, y] && !tiles[index - 1, x, y].GetComponent<Tile>().CoastOrWater && !tiles[index - 1, x, y].GetComponent<Tile>().MountainEdge) {
+                    valid[x, y] = true;
+                }
+                else {
+                    valid[x, y] = false;
+                }
+            }
+        }
+
+        return valid;
+    }
+    
+    // Returns the x/y index of the tile with the fewest possibilities.
+    private void FindMountainTileWithFewestPossbilities(int height, bool[,] valid, out int x, out int y) {
+        int min = int.MaxValue;
+        x = 0;
+        y = 0;
+
+        for (int xI = 0; xI < coefficientMatrix.GetLength(1); xI++) {
+            for (int yI = 0; yI < coefficientMatrix.GetLength(2); yI++) {
+                if (tiles[height, xI, yI] == null && valid[xI, yI]) {
+                    if (coefficientMatrix[height, xI, yI].Count > 0 && coefficientMatrix[height, xI, yI].Count < min) {
+                        min = coefficientMatrix[height, xI, yI].Count;
+                        x = xI;
+                        y = yI;
+                    }
+                }
+            }
+        }
+    }
+    #endregion
+
+    #region Biomes and Texturing
     private void TextureDaMap() {
         Dictionary<Vector2, Biome> bioDic = new Dictionary<Vector2, Biome> {
 
@@ -180,7 +284,185 @@ public class MapGenerator : MonoBehaviour
             return -2 * x + 2;
         }
     }
+    #endregion
+    
+    // Adds all valid matches of a certain tile to the CoefficientMatrix
+    private void CheckValid(List<Compatability> matrix, int tileIndex, int height, int x, int y, bool[,] mountValid = null) {
+        // Future Optimization: Add all coast tiles at once by type. No need to iterate through 3 coast corners.
+        Tile tileComp = tileList[tileIndex].GetComponent<Tile>();
 
+        if (mountValid == null && tileComp.Mountain) return;
+        else if (mountValid != null && tileComp.CoastOrWater) return;
+
+        // Tile sides.
+        Tile.SideType tileUp = tileComp.upSide;
+        Tile.SideType tileDown = tileComp.downSide;
+        Tile.SideType tileLeft = tileComp.leftSide;
+        Tile.SideType tileRight = tileComp.rightSide;
+
+        // Sides of neighboring tiles. Left = Left of current tile.
+        Tile.SideType upSide = Tile.SideType.DNE;
+        Tile.SideType downSide = Tile.SideType.DNE;
+        Tile.SideType leftSide = Tile.SideType.DNE;
+        Tile.SideType rightSide = Tile.SideType.DNE;
+
+        // Set Neighbor sides
+        if (y > 0 && tiles[height, x, y - 1] != null) {
+            upSide = tiles[height, x, y - 1].gameObject.GetComponent<Tile>().downSide;
+        }
+        if (y < Mathf.RoundToInt(mapSize.y) - 1 && tiles[height, x, y + 1] != null) {
+            downSide = tiles[height, x, y + 1].gameObject.GetComponent<Tile>().upSide;
+        }
+        if (x > 0 && tiles[height, x - 1, y] != null) {
+            leftSide = tiles[height, x - 1, y].gameObject.GetComponent<Tile>().rightSide;
+        }
+        if (x < Mathf.RoundToInt(mapSize.x) - 1 && tiles[height, x + 1, y] != null) {
+            rightSide = tiles[height, x + 1, y].gameObject.GetComponent<Tile>().leftSide;
+        }
+
+        // Adjust/Prepare Neighbor sides.
+        if (tileComp.Mountain) {
+            if (upSide == Tile.SideType.MountainUp) {
+                upSide = Tile.SideType.MountainDown;
+            }
+            else if (upSide == Tile.SideType.MountainDown) {
+                upSide = Tile.SideType.MountainUp;
+            }
+            else if (upSide == Tile.SideType.StairUp) {
+                upSide = Tile.SideType.StairDown;
+            }
+            else if (upSide == Tile.SideType.StairDown) {
+                upSide = Tile.SideType.StairUp;
+            }
+            else if(upSide == Tile.SideType.DNE && y > 0 && !mountValid[x,y-1]) {
+                upSide = Tile.SideType.Air;
+            }
+
+            if (downSide == Tile.SideType.MountainUp) {
+                downSide = Tile.SideType.MountainDown;
+            }
+            else if (downSide == Tile.SideType.MountainDown) {
+                downSide = Tile.SideType.MountainUp;
+            }
+            else if (downSide == Tile.SideType.StairUp) {
+                downSide = Tile.SideType.StairDown;
+            }
+            else if (downSide == Tile.SideType.StairDown) {
+                downSide = Tile.SideType.StairUp;
+            }
+            else if(downSide == Tile.SideType.DNE && y < tiles.GetLength(2) - 1 && !mountValid[x,y+1]) {
+                downSide = Tile.SideType.Air;
+            }
+
+            if (leftSide == Tile.SideType.MountainUp) {
+                leftSide = Tile.SideType.MountainDown;
+            }
+            else if (leftSide == Tile.SideType.MountainDown) {
+                leftSide = Tile.SideType.MountainUp;
+            }
+            else if (leftSide == Tile.SideType.StairUp) {
+                leftSide = Tile.SideType.StairDown;
+            }
+            else if (leftSide == Tile.SideType.StairDown) {
+                leftSide = Tile.SideType.StairUp;
+            }
+            else if (leftSide == Tile.SideType.DNE && x > 0 && !mountValid[x-1, y]) {
+                leftSide = Tile.SideType.Air;
+            }
+
+            if (rightSide == Tile.SideType.MountainUp) {
+                rightSide = Tile.SideType.MountainDown;
+            }
+            else if (rightSide == Tile.SideType.MountainDown) {
+                rightSide = Tile.SideType.MountainUp;
+            }
+            else if (rightSide == Tile.SideType.StairUp) {
+                rightSide = Tile.SideType.StairDown;
+            }
+            else if (rightSide == Tile.SideType.StairDown) {
+                rightSide = Tile.SideType.StairUp;
+            }
+            else if (rightSide == Tile.SideType.DNE && x < tiles.GetLength(1) - 1 && !mountValid[x + 1, y]) {
+                rightSide = Tile.SideType.Air;
+            }
+        }
+        else {
+            if (upSide == Tile.SideType.BeachUp) {
+                upSide = Tile.SideType.BeachDown;
+            }
+            else if (upSide == Tile.SideType.BeachDown) {
+                upSide = Tile.SideType.BeachUp;
+            }
+
+            if (downSide == Tile.SideType.BeachUp) {
+                downSide = Tile.SideType.BeachDown;
+            }
+            else if (downSide == Tile.SideType.BeachDown) {
+                downSide = Tile.SideType.BeachUp;
+            }
+
+            if (leftSide == Tile.SideType.BeachUp) {
+                leftSide = Tile.SideType.BeachDown;
+            }
+            else if (leftSide == Tile.SideType.BeachDown) {
+                leftSide = Tile.SideType.BeachUp;
+            }
+
+            if (rightSide == Tile.SideType.BeachUp) {
+                rightSide = Tile.SideType.BeachDown;
+            }
+            else if (rightSide == Tile.SideType.BeachDown) {
+                rightSide = Tile.SideType.BeachUp;
+            }
+
+        }
+        
+        float rot = 0f;
+        for (int i = 0; i < 4; i++) {
+            if ((tileUp == upSide || upSide == Tile.SideType.DNE)
+            && (tileDown == downSide || downSide == Tile.SideType.DNE)
+            && (tileLeft == leftSide || leftSide == Tile.SideType.DNE)
+            && (tileRight == rightSide || rightSide == Tile.SideType.DNE)) {
+                float tileWeight = tileComp.tileWeight;
+                if(upSide == Tile.SideType.DNE && 
+                    downSide == Tile.SideType.DNE && 
+                    leftSide == Tile.SideType.DNE && 
+                    rightSide == Tile.SideType.DNE) {
+                    tileWeight *= 0.05f;
+                }
+                matrix.Add(new Compatability(tileIndex, rot, tileWeight));
+            }
+            // Rotate
+            rot += 90f;
+            Tile.SideType temp = tileUp;
+            tileUp = tileLeft;
+            tileLeft = tileDown;
+            tileDown = tileRight;
+            tileRight = temp;
+        }
+    }
+
+    // Selects a random valid tile and places it.
+    private void SetTile(int height, int x, int y) {
+        float sum = 0f;
+        for (int i = 0; i < coefficientMatrix[height, x, y].Count; i++) {
+            sum += tileList[coefficientMatrix[height, x, y][i].index].GetComponent<Tile>().tileWeight;
+        }
+        float rand = Random.Range(0.0f, sum);
+        float cumulativeSum = 0f;
+        for (int i = 0; i < coefficientMatrix[height, x, y].Count; i++) {
+            cumulativeSum += tileList[coefficientMatrix[height, x, y][i].index].GetComponent<Tile>().tileWeight;
+            if (rand < cumulativeSum) {
+                float rot = coefficientMatrix[height, x, y][i].rotation;
+                tiles[height, x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height + 1, tileList[coefficientMatrix[height, x, y][i].index].transform, rot, x, y, false);
+                coefficientMatrix[height, x, y].Clear();
+                return;
+            }
+        }
+    }
+
+
+    /*
     // Optimize: Continue loop after true case.
     private bool PlaceRemainingMountain(Transform[,,] heightLevel, int height, int index) {
         bool changes = false;
@@ -1447,9 +1729,11 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
+    */
 
-    // Finds which tile has the fewest valid potential tiles.
-    private void FindTileWithFewestPossibilities(out int minx, out int miny) {
+    #region SeaLevel Methods    
+    // Returns the x/y index of the tile with the fewest possibilities.
+    private void FindSeaLevelTileWithFewestPossibilities(out int minx, out int miny) {
         int min = int.MaxValue;
         int xIndex = 0;
         int yIndex = 0;
@@ -1457,15 +1741,15 @@ public class MapGenerator : MonoBehaviour
         List<int> xZeros = new List<int>();
         List<int> yZeros = new List<int>();
 
-        for (int x = 0; x < coefficientMatrix.GetLength(0); x++) {
-            for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
-                if (tiles[x, y] == null) {
-                    if (coefficientMatrix[x, y].Count > 0 && coefficientMatrix[x, y].Count < min) {
-                        min = coefficientMatrix[x, y].Count;
+        for (int x = 0; x < coefficientMatrix.GetLength(1); x++) {
+            for (int y = 0; y < coefficientMatrix.GetLength(2); y++) {
+                if (tiles[0, x, y] == null) {
+                    if (coefficientMatrix[0, x, y].Count > 0 && coefficientMatrix[0, x, y].Count < min) {
+                        min = coefficientMatrix[0, x, y].Count;
                         xIndex = x;
                         yIndex = y;
                     }
-                    else if (coefficientMatrix[x, y].Count == 0) {
+                    else if (coefficientMatrix[0, x, y].Count == 0) {
                         xZeros.Add(x);
                         yZeros.Add(y);
                     }
@@ -1474,103 +1758,87 @@ public class MapGenerator : MonoBehaviour
         }
         minx = xIndex;
         miny = yIndex;
-        BackTrack(xZeros, yZeros);
-    }
-
-    // Selects a random valid tile and places it.
-    private void SetTile(int x, int y) {
-        float sum = 0f;
-        for(int i = 0; i < coefficientMatrix[x,y].Count; i++) {
-            sum += tileList[coefficientMatrix[x, y][i].index].GetComponent<Tile>().tileWeight;
-        }
-        float rand = Random.Range(0.0f, sum);
-        float cumulativeSum = 0f;
-        for (int i = 0; i < coefficientMatrix[x, y].Count; i++) {
-            cumulativeSum += tileList[coefficientMatrix[x, y][i].index].GetComponent<Tile>().tileWeight;
-            if(rand < cumulativeSum) {
-                float rot = coefficientMatrix[x, y][i].rotation;
-                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, coefficientMatrix[x, y][i].heightLevel, tileList[coefficientMatrix[x, y][i].index].transform, rot, x, y, false);
-                coefficientMatrix[x, y].Clear();
-                return;
-            }
-        }
-    }
+        SeaLevelBackTrack(xZeros, yZeros);
+    }  
 
     // Sets the surrounding tiles (including kitty corners) to null and resets the surrounding co-matrices.
-    private void BackTrack(List<int> xZero, List<int> yZero) {
+    private void SeaLevelBackTrack(List<int> xZero, List<int> yZero) {
         // Future Optimization: ResetCoefficient Matrix at the end of method.
         // Future Optimization: Make this into a look to add the capability of adjusting the size of the backtrack.
         for(int i = 0; i < xZero.Count; i++) {
             // Tile
-            tiles[xZero[i], yZero[i]] = null;
-            ResetCoeffecientMatrixAtTile(xZero[i], yZero[i]);
+            tiles[0, xZero[i], yZero[i]] = null;
+            ResetCoeffecientMatrixAtTile(0, xZero[i], yZero[i]);
 
             //Left
-            if (xZero[i] > 0 && tiles[xZero[i] - 1, yZero[i]] != null && !tiles[xZero[i] - 1, yZero[i]].GetComponent<Tile>().Mountain) {
-                tiles[xZero[i] - 1, yZero[i]] = null;
-                ResetCoeffecientMatrixAtTile(xZero[i] - 1, yZero[i]);
-                ResetCoeffecientMatrixSurroundingTile(xZero[i] - 1, yZero[i]);
+            if (xZero[i] > 0 && tiles[0, xZero[i] - 1, yZero[i]] != null && !tiles[0, xZero[i] - 1, yZero[i]].GetComponent<Tile>().Mountain) {
+                tiles[0, xZero[i] - 1, yZero[i]] = null;
+                ResetCoeffecientMatrixAtTile(0, xZero[i] - 1, yZero[i]);
+                ResetCoeffecientMatrixSurroundingTile(0, xZero[i] - 1, yZero[i]);
             }
 
             //Right
-            if (xZero[i] < Mathf.RoundToInt(mapSize.x) - 1 && tiles[xZero[i] + 1, yZero[i]] != null && !tiles[xZero[i] + 1, yZero[i]].GetComponent<Tile>().Mountain) {
-                tiles[xZero[i] + 1, yZero[i]] = null;
-                ResetCoeffecientMatrixAtTile(xZero[i] + 1, yZero[i]);
-                ResetCoeffecientMatrixSurroundingTile(xZero[i] + 1, yZero[i]);
+            if (xZero[i] < Mathf.RoundToInt(mapSize.x) - 1 && tiles[0, xZero[i] + 1, yZero[i]] != null && !tiles[0, xZero[i] + 1, yZero[i]].GetComponent<Tile>().Mountain) {
+                tiles[0, xZero[i] + 1, yZero[i]] = null;
+                ResetCoeffecientMatrixAtTile(0, xZero[i] + 1, yZero[i]);
+                ResetCoeffecientMatrixSurroundingTile(0, xZero[i] + 1, yZero[i]);
             }
 
             //Above
-            if (yZero[i] > 0 && tiles[xZero[i], yZero[i] - 1] != null && !tiles[xZero[i], yZero[i] - 1].GetComponent<Tile>().Mountain) {
-                tiles[xZero[i], yZero[i] - 1] = null;
-                ResetCoeffecientMatrixAtTile(xZero[i], yZero[i] - 1);
-                ResetCoeffecientMatrixSurroundingTile(xZero[i], yZero[i] - 1);
+            if (yZero[i] > 0 && tiles[0, xZero[i], yZero[i] - 1] != null && !tiles[0, xZero[i], yZero[i] - 1].GetComponent<Tile>().Mountain) {
+                tiles[0, xZero[i], yZero[i] - 1] = null;
+                ResetCoeffecientMatrixAtTile(0, xZero[i], yZero[i] - 1);
+                ResetCoeffecientMatrixSurroundingTile(0, xZero[i], yZero[i] - 1);
             }
 
             // Below
-            if (yZero[i] < Mathf.RoundToInt(mapSize.y) - 1 && tiles[xZero[i], yZero[i] + 1] != null && !tiles[xZero[i], yZero[i] + 1].GetComponent<Tile>().Mountain) {
-                tiles[xZero[i], yZero[i] + 1] = null;
-                ResetCoeffecientMatrixAtTile(xZero[i], yZero[i] + 1);
-                ResetCoeffecientMatrixSurroundingTile(xZero[i], yZero[i] + 1);
+            if (yZero[i] < Mathf.RoundToInt(mapSize.y) - 1 && tiles[0, xZero[i], yZero[i] + 1] != null && !tiles[0, xZero[i], yZero[i] + 1].GetComponent<Tile>().Mountain) {
+                tiles[0, xZero[i], yZero[i] + 1] = null;
+                ResetCoeffecientMatrixAtTile(0, xZero[i], yZero[i] + 1);
+                ResetCoeffecientMatrixSurroundingTile(0, xZero[i], yZero[i] + 1);
             }
 
             // DiagAboveLeft
-            if (yZero[i] > 0 && xZero[i] > 0 && tiles[xZero[i] - 1, yZero[i] - 1] != null && !tiles[xZero[i] - 1, yZero[i] - 1].GetComponent<Tile>().Mountain) {
-                tiles[xZero[i] - 1, yZero[i] - 1] = null;
-                ResetCoeffecientMatrixAtTile(xZero[i] - 1, yZero[i] - 1);
-                ResetCoeffecientMatrixSurroundingTile(xZero[i] - 1, yZero[i] - 1);
+            if (yZero[i] > 0 && xZero[i] > 0 && tiles[0, xZero[i] - 1, yZero[i] - 1] != null && !tiles[0, xZero[i] - 1, yZero[i] - 1].GetComponent<Tile>().Mountain) {
+                tiles[0, xZero[i] - 1, yZero[i] - 1] = null;
+                ResetCoeffecientMatrixAtTile(0, xZero[i] - 1, yZero[i] - 1);
+                ResetCoeffecientMatrixSurroundingTile(0, xZero[i] - 1, yZero[i] - 1);
             }
 
             // DiagAboveRight
-            if (yZero[i] > 0 && xZero[i] < Mathf.RoundToInt(mapSize.x) - 1 && tiles[xZero[i] + 1, yZero[i] - 1] != null && !tiles[xZero[i] + 1, yZero[i] - 1].GetComponent<Tile>().Mountain) {
-                tiles[xZero[i] + 1, yZero[i] - 1] = null;
-                ResetCoeffecientMatrixAtTile(xZero[i] + 1, yZero[i] - 1);
-                ResetCoeffecientMatrixSurroundingTile(xZero[i] + 1, yZero[i] - 1);
+            if (yZero[i] > 0 && xZero[i] < Mathf.RoundToInt(mapSize.x) - 1 && tiles[0, xZero[i] + 1, yZero[i] - 1] != null && !tiles[0, xZero[i] + 1, yZero[i] - 1].GetComponent<Tile>().Mountain) {
+                tiles[0, xZero[i] + 1, yZero[i] - 1] = null;
+                ResetCoeffecientMatrixAtTile(0, xZero[i] + 1, yZero[i] - 1);
+                ResetCoeffecientMatrixSurroundingTile(0, xZero[i] + 1, yZero[i] - 1);
             }
 
             // DiagBelowRight
-            if (yZero[i] < Mathf.RoundToInt(mapSize.y) - 1 && tiles[xZero[i] + 1, yZero[i] + 1] != null && xZero[i] < Mathf.RoundToInt(mapSize.x) - 1 && !tiles[xZero[i] + 1, yZero[i] + 1].GetComponent<Tile>().Mountain) {
-                tiles[xZero[i] + 1, yZero[i] + 1] = null;
-                ResetCoeffecientMatrixAtTile(xZero[i] + 1, yZero[i] + 1);
-                ResetCoeffecientMatrixSurroundingTile(xZero[i] + 1, yZero[i] + 1);
+            if (yZero[i] < Mathf.RoundToInt(mapSize.y) - 1 && tiles[0, xZero[i] + 1, yZero[i] + 1] != null && xZero[i] < Mathf.RoundToInt(mapSize.x) - 1 && !tiles[0, xZero[i] + 1, yZero[i] + 1].GetComponent<Tile>().Mountain) {
+                tiles[0, xZero[i] + 1, yZero[i] + 1] = null;
+                ResetCoeffecientMatrixAtTile(0, xZero[i] + 1, yZero[i] + 1);
+                ResetCoeffecientMatrixSurroundingTile(0, xZero[i] + 1, yZero[i] + 1);
             }
 
             // DiagBelowLeft
-            if (yZero[i] < Mathf.RoundToInt(mapSize.y) - 1 && tiles[xZero[i] - 1, yZero[i] + 1] != null && xZero[i] > 0 && !tiles[xZero[i] - 1, yZero[i] + 1].GetComponent<Tile>().Mountain) {
-                tiles[xZero[i] - 1, yZero[i] + 1] = null;
-                ResetCoeffecientMatrixAtTile(xZero[i] - 1, yZero[i] + 1);
-                ResetCoeffecientMatrixSurroundingTile(xZero[i] - 1, yZero[i] + 1);
+            if (yZero[i] < Mathf.RoundToInt(mapSize.y) - 1 && tiles[0, xZero[i] - 1, yZero[i] + 1] != null && xZero[i] > 0 && !tiles[0, xZero[i] - 1, yZero[i] + 1].GetComponent<Tile>().Mountain) {
+                tiles[0, xZero[i] - 1, yZero[i] + 1] = null;
+                ResetCoeffecientMatrixAtTile(0, xZero[i] - 1, yZero[i] + 1);
+                ResetCoeffecientMatrixSurroundingTile(0, xZero[i] - 1, yZero[i] + 1);
             }
         }
     }
+    #endregion
 
     // Resets the coefficient matrix of all tiles.
     private void InstantiateCoeffecientMatrix() {
-        for(int x = 0; x < coefficientMatrix.GetLength(0); x++) {
-            for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
-                coefficientMatrix[x, y] = new List<Compatability>();
-                if (tiles[x,y] == null) {
-                    for(int i = 0; i < tileList.Length; i++) {
-                        CheckValid(coefficientMatrix[x, y], i, x, y);
+        for(int height = 0; height < coefficientMatrix.GetLength(0); height++) {
+            for (int x = 0; x < coefficientMatrix.GetLength(1); x++) {
+                for (int y = 0; y < coefficientMatrix.GetLength(2); y++) {
+                    coefficientMatrix[height, x, y] = new List<Compatability>();
+                    if (tiles[height, x, y] == null && height == 0) { // Height == 0 as the mt matrices are dependent on the tiles below.
+                        for (int i = 0; i < tileList.Length; i++) {
+                            CheckValid(coefficientMatrix[height, x, y], i, height, x, y);
+                        }
                     }
                 }
             }
@@ -1578,36 +1846,36 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Resets the coefficient matrix of all surrounding tiles (but not the given one).
-    private void ResetCoeffecientMatrixSurroundingTile(int x, int y) {
+    private void ResetCoeffecientMatrixSurroundingTile(int height, int x, int y) {
         if(x > 0) {
-            if (tiles[x - 1, y] == null) {
-                coefficientMatrix[x - 1, y].Clear();
+            if (tiles[height, x - 1, y] == null) {
+                coefficientMatrix[height, x - 1, y].Clear();
                 for (int i = 0; i < tileList.Length; i++) {
-                    CheckValid(coefficientMatrix[x - 1, y], i, x - 1, y);
+                    CheckValid(coefficientMatrix[height, x - 1, y], i, height, x - 1, y);
                 }
             }
         }
-        if (x < Mathf.RoundToInt(mapSize.x) - 1) {
-            if (tiles[x + 1, y] == null) {
-                coefficientMatrix[x + 1, y].Clear();
+        if (x < coefficientMatrix.GetLength(1) - 1) {
+            if (tiles[height, x + 1, y] == null) {
+                coefficientMatrix[height, x + 1, y].Clear();
                 for (int i = 0; i < tileList.Length; i++) {
-                    CheckValid(coefficientMatrix[x + 1, y], i, x + 1, y);
+                    CheckValid(coefficientMatrix[height, x + 1, y], i, height, x + 1, y);
                 }
             }
         }
         if (y > 0) {
-            if (tiles[x, y - 1] == null) {
-                coefficientMatrix[x, y - 1].Clear();
+            if (tiles[height, x, y - 1] == null) {
+                coefficientMatrix[height, x, y - 1].Clear();
                 for (int i = 0; i < tileList.Length; i++) {
-                    CheckValid(coefficientMatrix[x, y - 1], i, x, y - 1);
+                    CheckValid(coefficientMatrix[height, x, y - 1], i, height, x, y - 1);
                 }
             }
         }
-        if (y < Mathf.RoundToInt(mapSize.y) - 1) {
-            if (tiles[x, y + 1] == null) {
-                coefficientMatrix[x, y + 1].Clear();
+        if (y < coefficientMatrix.GetLength(2) - 1) {
+            if (tiles[height, x, y + 1] == null) {
+                coefficientMatrix[height, x, y + 1].Clear();
                 for (int i = 0; i < tileList.Length; i++) {
-                    CheckValid(coefficientMatrix[x, y + 1], i, x, y + 1);
+                    CheckValid(coefficientMatrix[height, x, y + 1], i, height, x, y + 1);
                 }
             }
         }
@@ -1615,18 +1883,18 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Resets the coefficient matrix at a given tile.
-    private void ResetCoeffecientMatrixAtTile(int x, int y) {
-        coefficientMatrix[x, y].Clear();
+    private void ResetCoeffecientMatrixAtTile(int height, int x, int y) {
+        coefficientMatrix[height, x, y].Clear();
         for (int i = 0; i < tileList.Length; i++) {
-            CheckValid(coefficientMatrix[x, y], i, x, y);
+            CheckValid(coefficientMatrix[height, x, y], i, height, x, y);
         }
     }
 
     // Returns true if there are no gaps. False otherwise.
     private bool CheckIfCollapsed() {
-        for(int x = 0; x < tiles.GetLength(0); x++) {
-            for (int y = 0; y < tiles.GetLength(1); y++) {
-                if(tiles[x,y] == null) {
+        for(int x = 0; x < tiles.GetLength(1); x++) {
+            for (int y = 0; y < tiles.GetLength(2); y++) {
+                if(tiles[0, x, y] == null) {
                     return false;
                 }
             }
@@ -1634,6 +1902,19 @@ public class MapGenerator : MonoBehaviour
         return true;
     }
 
+    // Mountain Overload
+    private bool CheckIfCollapsed(int height, bool[,] mtValid) {
+        for (int x = 0; x < tiles.GetLength(1); x++) {
+            for (int y = 0; y < tiles.GetLength(2); y++) {
+                if (mtValid[x,y] && tiles[height, x, y] == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    #region Noise
     // Creates Noise Map... yeah
     private float[,] GenerateNoiseMap(float scale) {
         float[,] noiseMap = new float[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
@@ -1678,6 +1959,7 @@ public class MapGenerator : MonoBehaviour
         return map;
     }
 
+    // Falloff Map eval curve (it adjusts how quickly it falls of)
     private float EvalWithCurve(float val) {
         float a = 3;
         float b = fallOffMapPower;
@@ -1702,6 +1984,7 @@ public class MapGenerator : MonoBehaviour
         else
             return 6;
     }
+    #endregion
 
     // Places HeightMapCubes ||| Need to change mountains.
     public void PlaceHeightMapCubes(float[,] perlin) {
@@ -1710,11 +1993,12 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < coordinates.GetLength(1); y++) {
                 int heightLevel = GetHeightLevelFromPerlin(perlin[x, y]);
                 if(heightLevel == 0) {
-                    tiles[x,y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, waterTile, 0f, x, y, true);
+                    tiles[0, x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, waterTile, 0f, x, y, true);
                 }
+                /*
                 else if(heightLevel > 1) {
-                    tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, landTile, 0f, x, y, true);
-                }
+                    tiles[0, x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, heightLevel, landTile, 0f, x, y, true);
+                }*/
             }
         }
     }
@@ -1734,6 +2018,7 @@ public class MapGenerator : MonoBehaviour
         }
 
         cubey.parent = parent;
+        /*
         cubey.GetComponent<Tile>().tileLevel = heightLevel;
 
         // Fill in Land Cubes Below Mountain // Set Mountain Array
@@ -1750,7 +2035,7 @@ public class MapGenerator : MonoBehaviour
                     return land;
                 }
             }
-        }
+        }*/
 
         // Raise Water Cubes
         if (heightLevel == 0) {
@@ -1760,85 +2045,7 @@ public class MapGenerator : MonoBehaviour
         return cubey;
     }
 
-    // Adds all valid matches of a certain tile to the CoefficientMatrix
-    private void CheckValid(List<Compatability> matrix, int tileIndex, int x, int y) {
-        // Future Optimization: Add all coast tiles at once by type. No need to iterate through 3 coast corners.
-        if (tileList[tileIndex].GetComponent<Tile>().Mountain) {
-            return;
-        }
-        // Tile sides.
-        Tile.SideType tileUp = tileList[tileIndex].GetComponent<Tile>().upSide;
-        Tile.SideType tileDown = tileList[tileIndex].GetComponent<Tile>().downSide;
-        Tile.SideType tileLeft = tileList[tileIndex].GetComponent<Tile>().leftSide;
-        Tile.SideType tileRight = tileList[tileIndex].GetComponent<Tile>().rightSide;
-
-        // Sides of neighboring tiles. Left = Left of current tile.
-        Tile.SideType upSide = Tile.SideType.DNE;
-        Tile.SideType downSide = Tile.SideType.DNE;
-        Tile.SideType leftSide = Tile.SideType.DNE;
-        Tile.SideType rightSide = Tile.SideType.DNE;
-
-        if (y > 0 && tiles[x, y - 1] != null) {
-            upSide = tiles[x, y - 1].gameObject.GetComponent<Tile>().downSide;
-        }
-        if (y < Mathf.RoundToInt(mapSize.y) - 1 && tiles[x, y + 1] != null) {
-            downSide = tiles[x, y + 1].gameObject.GetComponent<Tile>().upSide;
-        }
-        if (x > 0 && tiles[x - 1, y] != null) {
-            leftSide = tiles[x - 1, y].gameObject.GetComponent<Tile>().rightSide;
-        }
-        if (x < Mathf.RoundToInt(mapSize.x) - 1 && tiles[x + 1, y] != null) {
-            rightSide = tiles[x + 1, y].gameObject.GetComponent<Tile>().leftSide;
-        }
-
-        // Set Neighboring tile sides.
-        if (upSide == Tile.SideType.BeachUp) {
-            upSide = Tile.SideType.BeachDown;
-        }
-        else if (upSide == Tile.SideType.BeachDown) {
-            upSide = Tile.SideType.BeachUp;
-        }
-
-        if (downSide == Tile.SideType.BeachUp) {
-            downSide = Tile.SideType.BeachDown;
-        }
-        else if (downSide == Tile.SideType.BeachDown) {
-            downSide = Tile.SideType.BeachUp;
-        }
-        
-        if (leftSide == Tile.SideType.BeachUp) {
-            leftSide = Tile.SideType.BeachDown;
-        }
-        else if (leftSide == Tile.SideType.BeachDown) {
-            leftSide = Tile.SideType.BeachUp;
-        }
-        
-        if (rightSide == Tile.SideType.BeachUp) {
-            rightSide = Tile.SideType.BeachDown;
-        }
-        else if (rightSide == Tile.SideType.BeachDown) {
-            rightSide = Tile.SideType.BeachUp;
-        }
-        
-        float rot = 0f;
-
-        for (int i = 0; i < 4; i++) {
-            if ((tileUp == upSide || upSide == Tile.SideType.DNE)
-            && (tileDown == downSide || downSide == Tile.SideType.DNE)
-            && (tileLeft == leftSide || leftSide == Tile.SideType.DNE)
-            && (tileRight == rightSide || rightSide == Tile.SideType.DNE)) {
-                matrix.Add(new Compatability(tileIndex, rot, 1, tileList[tileIndex].GetComponent<Tile>().tileWeight));
-            }
-            // Rotate
-            rot += 90f;
-            Tile.SideType temp = tileUp;
-            tileUp = tileLeft;
-            tileLeft = tileDown;
-            tileDown = tileRight;
-            tileRight = temp;
-        }
-    }
-
+    #region Unused (For Now) Methods
     // Unused but could be useful.
     private int GetTileIndexFromName(string name) {
         for (int i = 0; i < tileList.Length; i++) {
@@ -1864,18 +2071,17 @@ public class MapGenerator : MonoBehaviour
         }
         
     }
+    #endregion
 
     // Stores the data for each match in the Coefficient Matrix.
     struct Compatability {
         public int index;
         public float rotation;
-        public int heightLevel;
         public float tileWeight;
 
-        public Compatability(int ind, float rot, int level, float weight) {
+        public Compatability(int ind, float rot, float weight) {
             index = ind;
             rotation = rot;
-            heightLevel = level;
             tileWeight = weight;
         }
     }
