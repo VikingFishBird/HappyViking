@@ -57,6 +57,8 @@ public class MapGenerator : MonoBehaviour
     // Prefab List
     static GameObject[] tileList;
 
+    Transform[,] topTiles;
+
     // Boolean for the WFC completion.
     bool fullyCollapsed;
 
@@ -170,6 +172,19 @@ public class MapGenerator : MonoBehaviour
                 count++;
                 if (count > 30000) {
                     break;
+                }
+            }
+
+            // Set Top Tiles
+            for(int x = 0; x < tiles.GetLength(1); x++) {
+                for (int y = 0; y < tiles.GetLength(2); y++) {
+                    for(int height = 0; height < tiles.GetLength(0); height++) {
+                        if (tiles[height, x, y] == null) {
+                            topTiles[x, y] = tiles[height - 1, x, y];
+                        }
+                    }
+                    if (topTiles[x, y] == null)
+                        topTiles[x, y] = tiles[tiles.GetLength(0) - 1, x, y];
                 }
             }
         }
