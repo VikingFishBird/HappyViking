@@ -91,7 +91,7 @@ public class MapGenerator : MonoBehaviour
         // Instantiate the Coefficient Matrix / Arrays
         coefficientMatrix = new List<Compatability>[6, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         tiles = new Transform[6, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
-
+        topTiles = new Transform[tiles.GetLength(1), tiles.GetLength(2)];
         //heightMapArrays = new Transform[5, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         
         // Reset fully collapsed bool value.
@@ -181,6 +181,7 @@ public class MapGenerator : MonoBehaviour
                     for(int height = 0; height < tiles.GetLength(0); height++) {
                         if (tiles[height, x, y] == null) {
                             topTiles[x, y] = tiles[height - 1, x, y];
+                            break;
                         }
                     }
                     if (topTiles[x, y] == null)
