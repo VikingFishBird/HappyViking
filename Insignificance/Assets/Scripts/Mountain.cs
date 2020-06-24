@@ -6,10 +6,14 @@ public enum BlockType { Side, Stair, Corner, Wedge, Peak, Land, Air };
 
 public class Mountain
 {
-    
+    public int height, length, width;
+
     public BlockData[,,] blockArray;
 
-    public Mountain(int height, int length, int width) {
+    public Mountain(int _height, int _length, int _width) {
+        height = _height;
+        length = _length;
+        width = _width;
         blockArray = new BlockData[height, length, width];
     }
 }

@@ -112,7 +112,23 @@ public class MapGenerator : MonoBehaviour
                 break;
             }
         }
+
+        // Future Optimization: Create this array beforehand and use it in other methods to minimize .GetComp calls.
+        Tile[,] tileComps = new Tile[tiles.GetLength(0), tiles.GetLength(1)];
+        for(int x = 0; x < tileComps.GetLength(0); x++) {
+            for (int y = 0; y < tileComps.GetLength(1); y++) {
+                tileComps[x, y] = tiles[x, y].GetComponent<Tile>();
+            }
+        }
+
+        // Mountains
+        int mountainAttempts = Mathf.RoundToInt(mapSize.x * 0.1f);
         
+        for(int i = 0; i < mountainAttempts; i++) {
+            // Coordinate
+            Vector2Int coords = new Vector2Int(Random.Range(0, tiles.GetLength(0)), Random.Range(0, tiles.GetLength(1)));
+            List<Mountain> mts = FindMtsAtCoord(coords, tileComps);
+        }
     }
     
     #region Biomes and Texturing
@@ -147,6 +163,44 @@ public class MapGenerator : MonoBehaviour
     }
     #endregion
     
+    // Mountain Methods
+    public List<Mountain> FindMtsAtCoord(Vector2Int coords, Tile[,] tileComps) {
+        Mountain[] mountains = MountainData.mountains;
+
+        List<Mountain> mts = new List<Mountain>();
+        List<Vector2Int> failedCoords = new List<Vector2Int>();
+
+        for (int i = 0; i < mountains.Length; i++) { // Make Sure to sort mountains by smallest size to greatest size.
+            Mountain mt = mountains[i];
+
+            // Quick Invalidations
+            if (mt.width + coords.x > tiles.GetLength(0) || mt.length + coords.y > tiles.GetLength(1)) continue;
+
+                bool dq = false;
+            // Check if disqualified by previous failed coords:
+            for (int coord = 0; coord < failedCoords.Count; coord++) {
+                if (mt.width + coords.x >= failedCoords[coord].x && mt.length + coords.y >= failedCoords[coord].y) {
+                    dq = true;
+                }
+            }
+            if (dq) continue;
+
+            // Future Optimization: Iterate through the edges as those will more likely be an issue.
+            for(int x = coords.x; x < coords.x + mt.width; x++) {
+                for (int y = coords.y; y < coords.y + mt.length; y++) {
+                    if (tileComps[x, y].CoastOrWater)
+                        dq = true;
+                }
+            }
+
+            if (!dq) {
+                mts.Add(mt);
+            }
+        }
+
+        return mts;
+    }
+
     // Adds all valid matches of a certain tile to the CoefficientMatrix
     private void CheckValid(List<Compatability> matrix, int tileIndex, int x, int y) {
         // Future Optimization: Add all coast tiles at once by type. No need to iterate through 3 coast corners.
