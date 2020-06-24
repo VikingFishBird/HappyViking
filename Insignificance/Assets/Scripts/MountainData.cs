@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MountainData
 {
-    public Mountain[] mountains;
+    public static Mountain[] mountains;
     
     public MountainData() {
         // Set mountains array. Add 1 to length when you add a mountain.
