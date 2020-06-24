@@ -14,12 +14,6 @@ public class Tile : MonoBehaviour
     // How often a tile is placed.
     public float tileWeight;
 
-    // Height of tile.
-    public int tileLevel;
-
     public bool Mountain;
     public bool CoastOrWater;
-    public bool Stair;
-    public bool Land;
-    public bool MountainEdge;
 }

@@ -47,7 +47,7 @@ MonoBehaviour:
   leftSide: 4
   downSide: 4
   rightSide: 4
-  tileWeight: 100
+  tileWeight: 200
   tileLevel: 0
   Mountain: 1
   CoastOrWater: 0
