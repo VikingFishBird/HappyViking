@@ -15,10 +15,11 @@ public class MapGenerator : MonoBehaviour
     public Transform waterTile;
     public Transform landTile;
 
-    public Transform CornerTile;
-    public Transform SideTile;
-    public Transform StairTile;
-    public Transform WedgeTile;
+    public Transform[] Corner;
+    public Transform[] Side;
+    public Transform[] Wedge;
+    public Transform[] Peak;
+    public Transform[] MTLand;
 
     enum Biome { };
 
@@ -27,6 +28,9 @@ public class MapGenerator : MonoBehaviour
 
     // Array of coordinates of tiles.
     public Coord[,] coordinates;
+
+    // Holds all Mountains
+    MountainData mtData;
 
     // Holds possible tiles.
     List<Compatability>[,] coefficientMatrix;
@@ -46,9 +50,11 @@ public class MapGenerator : MonoBehaviour
         // Get Tile Prefabs
         tileList = Resources.LoadAll<GameObject>("Prefabs/Tiles");
         for(int i = 0; i < tileList.Length; i++) {
-            PlaceCubeAtCoord(new Coord(i, 60), transform, 1, tileList[i].transform, 90, 0, 0, false);
+            PlaceCubeAtCoord(new Coord(i, 60), transform, 1, tileList[i].transform, 90);
         }
-        
+
+        mtData = new MountainData();
+
         // Generate Map
         GenerateMap();
     }
@@ -118,16 +124,29 @@ public class MapGenerator : MonoBehaviour
         for(int x = 0; x < tileComps.GetLength(0); x++) {
             for (int y = 0; y < tileComps.GetLength(1); y++) {
                 tileComps[x, y] = tiles[x, y].GetComponent<Tile>();
+                topTiles[x, y] = tiles[x, y];
             }
         }
 
         // Mountains
-        int mountainAttempts = Mathf.RoundToInt(mapSize.x * 0.1f);
-        
+        int mountainAttempts = Mathf.RoundToInt(mapSize.x * 0.2f);
+        Dictionary<BlockType, Transform[]> mtDic = new Dictionary<BlockType, Transform[]>() {
+            { BlockType.Air, null },
+            { BlockType.Side, Side },
+            { BlockType.Wedge, Wedge },
+            { BlockType.Corner, Corner },
+            { BlockType.Land, MTLand },
+            { BlockType.Peak, Peak }
+        };
+
         for(int i = 0; i < mountainAttempts; i++) {
             // Coordinate
             Vector2Int coords = new Vector2Int(Random.Range(0, tiles.GetLength(0)), Random.Range(0, tiles.GetLength(1)));
             List<Mountain> mts = FindMtsAtCoord(coords, tileComps);
+            Mountain mt = SetMT(mts);
+            if (mt != null) {
+                PlaceMT(mt, coords, mtDic);
+            }
         }
     }
     
@@ -162,10 +181,11 @@ public class MapGenerator : MonoBehaviour
         }
     }
     #endregion
-    
+
+    #region Mountains
     // Mountain Methods
     public List<Mountain> FindMtsAtCoord(Vector2Int coords, Tile[,] tileComps) {
-        Mountain[] mountains = MountainData.mountains;
+        Mountain[] mountains = mtData.mountains;
 
         List<Mountain> mts = new List<Mountain>();
         List<Vector2Int> failedCoords = new List<Vector2Int>();
@@ -174,21 +194,26 @@ public class MapGenerator : MonoBehaviour
             Mountain mt = mountains[i];
 
             // Quick Invalidations
-            if (mt.width + coords.x > tiles.GetLength(0) || mt.length + coords.y > tiles.GetLength(1)) continue;
+            if (mt.width + coords.x > tiles.GetLength(0) || mt.length + coords.y > tiles.GetLength(1)) {
+                continue;
+            }
 
-                bool dq = false;
+            bool dq = false;
             // Check if disqualified by previous failed coords:
             for (int coord = 0; coord < failedCoords.Count; coord++) {
                 if (mt.width + coords.x >= failedCoords[coord].x && mt.length + coords.y >= failedCoords[coord].y) {
                     dq = true;
                 }
             }
-            if (dq) continue;
+
+            if (dq) {
+                continue;
+            }
 
             // Future Optimization: Iterate through the edges as those will more likely be an issue.
             for(int x = coords.x; x < coords.x + mt.width; x++) {
                 for (int y = coords.y; y < coords.y + mt.length; y++) {
-                    if (tileComps[x, y].CoastOrWater)
+                    if (tileComps[x, y].CoastOrWater || topTiles[x,y].GetComponent<Tile>().Mountain)
                         dq = true;
                 }
             }
@@ -200,6 +225,40 @@ public class MapGenerator : MonoBehaviour
 
         return mts;
     }
+
+    private Mountain SetMT(List<Mountain> mts) {
+        // Calculate the total sum of the mtsArray weights.
+        float sum = 0f;
+        for(int i = 0; i < mts.Count; i++) {
+            sum += mts[i].weight;
+        }
+        float rand = Random.Range(0.0f, sum);
+        float cumSum = 0.0f;
+        // Select random MT (weighted).
+        for (int i = 0; i < mts.Count; i++) {
+            cumSum += mts[i].weight;
+            if(rand < cumSum) {
+                return mts[i];
+            }
+        }
+
+        // This should not happen if mts.Count > 0.
+        return null;
+    }
+    
+    private void PlaceMT(Mountain mt, Vector2Int coords, Dictionary<BlockType, Transform[]> dic) {
+        for(int height = 0; height < mt.height; height++) {
+            for (int y = coords.y; y < mt.length + coords.y; y++) {
+                for (int x = coords.x; x < mt.width + coords.x; x++) {
+                    Transform[] block = dic[mt.blockArray[height, y - coords.y, x - coords.x].blockType];
+                    if(block != null) {
+                        topTiles[x,y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height + 2, block[Random.Range(0, block.Length)], mt.blockArray[height, y - coords.y, x - coords.x].rotation, true);
+                    }
+                }
+            }
+        }
+    }
+    #endregion
 
     // Adds all valid matches of a certain tile to the CoefficientMatrix
     private void CheckValid(List<Compatability> matrix, int tileIndex, int x, int y) {
@@ -299,7 +358,7 @@ public class MapGenerator : MonoBehaviour
             cumulativeSum += tileList[coefficientMatrix[x, y][i].index].GetComponent<Tile>().tileWeight;
             if (rand < cumulativeSum) {
                 float rot = coefficientMatrix[x, y][i].rotation;
-                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, 1, tileList[coefficientMatrix[x, y][i].index].transform, rot, x, y, false);
+                tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, 1, tileList[coefficientMatrix[x, y][i].index].transform, rot);
                 coefficientMatrix[x, y].Clear();
                 return;
             }
@@ -543,25 +602,27 @@ public class MapGenerator : MonoBehaviour
         for (int x = 0; x < coordinates.GetLength(0); x++) {
             for (int y = 0; y < coordinates.GetLength(1); y++) {
                 if(GetHeightLevelFromPerlin(perlin[x, y])) {
-                    tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, 1, waterTile, 0f, x, y, true);
+                    tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, 1, waterTile, 0f);
                 }
             }
         }
     }
 
     // Places tile at a coordinate... yep.
-    public Transform PlaceCubeAtCoord(Coord coord, Transform parent, int heightLevel, Transform tile, float rot, int x, int y, bool perlin) {
+    public Transform PlaceCubeAtCoord(Coord coord, Transform parent, int heightLevel, Transform tile, float rot, bool mt = false) {
         Transform cubey = Instantiate(tile, new Vector3(coord.x, -0.5f + heightLevel, coord.y), Quaternion.Euler(new Vector3(0, rot, 0)));
 
-        Tile tileComp = cubey.GetComponent<Tile>();
-        float i = 0f;
-        while(i < rot) {
-            Tile.SideType temp = tileComp.upSide;
-            tileComp.upSide = tileComp.leftSide;
-            tileComp.leftSide = tileComp.downSide;
-            tileComp.downSide = tileComp.rightSide;
-            tileComp.rightSide = temp;
-            i += 90f;
+        if (!mt) {
+            Tile tileComp = cubey.GetComponent<Tile>();
+            float i = 0f;
+            while (i < rot) {
+                Tile.SideType temp = tileComp.upSide;
+                tileComp.upSide = tileComp.leftSide;
+                tileComp.leftSide = tileComp.downSide;
+                tileComp.downSide = tileComp.rightSide;
+                tileComp.rightSide = temp;
+                i += 90f;
+            }
         }
         cubey.parent = parent;
        

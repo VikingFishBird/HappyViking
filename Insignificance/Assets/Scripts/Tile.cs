@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public enum SideType { Water, Land, BeachUp, BeachDown, Air, MountainUp, MountainDown, DoubleMountain, StairUp, StairDown, DNE };
+    public enum SideType { Water, Land, BeachUp, BeachDown, DNE };
     // Tile types;
     public SideType upSide;
     public SideType leftSide;
