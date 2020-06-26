@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Threading.Tasks;
+using System.Linq;
 
 // Optimize: Combine Meshes, Create separate arrays for coastTileList and mtTileList
 public class MapGenerator : MonoBehaviour
@@ -11,7 +11,9 @@ public class MapGenerator : MonoBehaviour
     public float fallOffMapPower;
     [Range(0.0f, 1.0f)]
     public float waterRate;
+    public float mtRate;
 
+    [Space]
     public Transform waterTile;
     public Transform landTile;
 
@@ -21,8 +23,17 @@ public class MapGenerator : MonoBehaviour
     public Transform[] Peak;
     public Transform[] MTLand;
 
-    enum Biome { };
+    [Space]
+    public Material SnowForestGrass;
+    public Material SnowForestStone;
+    public Material ForestGrass;
+    public Material ForestStone;
+    public Material PlainGrass;
+    public Material PlainStone;
+    public Material DesertGrass;
+    public Material DesertStone;
 
+    [Space]
     // The GameObject holding all the tiles.
     Transform mapHolder;
 
@@ -43,6 +54,8 @@ public class MapGenerator : MonoBehaviour
 
     // Boolean for the WFC completion.
     bool fullyCollapsed;
+
+    public enum Biome { SnowForest, Forest, Plains, Desert};
     
     // Start is called before the first frame update
     void Start()
@@ -95,7 +108,7 @@ public class MapGenerator : MonoBehaviour
         mapHolder.parent = transform;
 
         // Get Noise Map
-        float[,] noiseMap = GenerateNoiseMap(noiseMapScale);
+        float[,] noiseMap = GenerateNoiseMap(noiseMapScale, true);
         // Set Water / Mountains
         PlaceHeightMapCubes(noiseMap);
         // Set possibilities for Wave Function Collpase Algorithm
@@ -129,7 +142,7 @@ public class MapGenerator : MonoBehaviour
         }
 
         // Mountains
-        int mountainAttempts = Mathf.RoundToInt(mapSize.x * 0.2f);
+        int mountainAttempts = Mathf.RoundToInt(mapSize.x * mtRate);
         Dictionary<BlockType, Transform[]> mtDic = new Dictionary<BlockType, Transform[]>() {
             { BlockType.Air, null },
             { BlockType.Side, Side },
@@ -148,13 +161,80 @@ public class MapGenerator : MonoBehaviour
                 PlaceMT(mt, coords, mtDic);
             }
         }
+
+        // Biomes
+        Biome[,] biomes = GenerateBiomesArray();
+        for(int x = 0; x < biomes.GetLength(0); x++) {
+            for (int y = 0; y < biomes.GetLength(1); y++) {
+                Material[] mats = topTiles[x, y].GetChild(0).GetComponent<MeshRenderer>().materials;
+                Material grass;
+                Material stone;
+                if(biomes[x,y] == Biome.SnowForest) {
+                    grass = SnowForestGrass;
+                    stone = SnowForestStone;
+                }
+                else if (biomes[x, y] == Biome.Forest) {
+                    grass = ForestGrass;
+                    stone = ForestStone;
+                }
+                else if (biomes[x, y] == Biome.Plains) {
+                    grass = PlainGrass;
+                    stone = PlainStone;
+                }
+                else {
+                    grass = DesertGrass;
+                    stone = DesertStone;
+                }
+
+                if (mats.Length == 1) {
+                    mats = new Material[] { grass };
+                }
+                else if (mats.Length == 2) {
+                    if (mats[0].name.Equals("Grass")) {
+                        mats = new Material[] { grass, stone };
+                    }
+                    else {
+                        mats = new Material[] { stone, grass };
+                    }
+                }
+
+                topTiles[x, y].GetChild(0).GetComponent<MeshRenderer>().materials = mats;
+            }
+        }
     }
     
     #region Biomes and Texturing
-    private void TextureDaMap() {
-        Dictionary<Vector2, Biome> bioDic = new Dictionary<Vector2, Biome> {
+    private Biome[,] GenerateBiomesArray() {
+        float[,] precipnoiseMap = GenerateNoiseMap(4, false);
+        float[,] tempnoiseMap = GenerateNoiseMap(4, false);
+        string bioStr = "";
+        Biome[,] biomes = new Biome[precipnoiseMap.GetLength(0), precipnoiseMap.GetLength(1)];
+        for (int y = 0; y < biomes.GetLength(1); y++) {
+            float basePrec = EvalPrecipitation((float)y / biomes.GetLength(1));
+            float baseTemp = EvalTemperature((float)y / biomes.GetLength(1));
+            for (int x = 0; x < biomes.GetLength(0); x++) {
+                float prec = 0.4f * (precipnoiseMap[x, y] - 0.5f) + basePrec;
+                float temp = 0.4f * (tempnoiseMap[x, y] - 0.5f) + baseTemp;
+                if(prec < 0.5f && temp < 0.5f) {
+                    biomes[x, y] = Biome.Plains;
+                }
+                else if (prec > 0.5f && temp < 0.5f) {
+                    biomes[x, y] = Biome.SnowForest;
+                }
+                else if (prec < 0.5f && temp > 0.5f) {
+                    biomes[x, y] = Biome.Desert;
+                }
+                else {
+                    biomes[x, y] = Biome.Forest;
+                }
+                bioStr += precipnoiseMap[x, y] + " ";
+            }
+            bioStr += "\n";
+        }
 
-        };
+        print(bioStr);
+
+        return biomes;
 
     }
     
@@ -536,16 +616,17 @@ public class MapGenerator : MonoBehaviour
 
     #region Noise
     // Creates Noise Map... yeah
-    private float[,] GenerateNoiseMap(float scale) {
+    private float[,] GenerateNoiseMap(float scale, bool falloffBool) {
         float[,] noiseMap = new float[Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         float offSetX = Random.Range(-100000, 100000);
         float offSetY = Random.Range(-100000, 100000);
 
         float halfWidth = mapSize.x / 2f;
         float halfHeight = mapSize.y / 2f;
-
-        float[,] falloff = GenerateFalloffMap();
-
+        float[,] falloff = new float[noiseMap.GetLength(0), noiseMap.GetLength(1)];
+        if (falloffBool) {
+            falloff = GenerateFalloffMap();
+        }
         for (int x = 0; x < mapSize.x; x++) {
 
             for (int y = 0; y < mapSize.y; y++) {
@@ -554,7 +635,10 @@ public class MapGenerator : MonoBehaviour
 
                 float perlinValue = Mathf.Clamp(Mathf.PerlinNoise(sampleX, sampleY), 0, 1);
 
-                noiseMap[x, y] = Mathf.Clamp01(perlinValue - falloff[x,y]);
+                if (falloffBool)
+                    noiseMap[x, y] = Mathf.Clamp01(perlinValue - falloff[x, y]);
+                else
+                    noiseMap[x, y] = perlinValue;
             }
         }
 

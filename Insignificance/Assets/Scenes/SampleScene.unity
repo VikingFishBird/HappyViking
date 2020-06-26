@@ -785,6 +785,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraTransform: {fileID: 963194228}
+  followTransform: {fileID: 0}
   fastSpeed: 1
   normalSpeed: 0.1
   movementSpeed: 1
@@ -933,21 +934,37 @@ MonoBehaviour:
   noiseMapScale: 16
   fallOffMapPower: 7
   waterRate: 0.25
+  mtRate: 0.3
   waterTile: {fileID: 3534400398522354784, guid: a4c13fe9c1df59e4792111d6f5313b9a,
     type: 3}
   landTile: {fileID: 8137103259800632613, guid: 2fbe1057816e2f140bfc42d7632f05c4,
     type: 3}
   Corner:
   - {fileID: 7333320901884655971, guid: 0eab61aafc364784e9887e28c744c380, type: 3}
+  - {fileID: 5335900662364585263, guid: 08072ab4dbf35594ca88efbfe9d50933, type: 3}
+  - {fileID: 5892316766384885457, guid: b51506b7e46015342bd3fcc64f27ae92, type: 3}
   Side:
   - {fileID: 8391760547670312806, guid: 5563118e2414f7d41b4218be5aaa3fca, type: 3}
-  - {fileID: 4013498721710181532, guid: 5c6ca34ce872ad840911a558c994bb63, type: 3}
+  - {fileID: 2843705873004606680, guid: 9446f1277c5daa940b9f9d69113f4d9d, type: 3}
+  - {fileID: 5988124937898521178, guid: 5c6ca34ce872ad840911a558c994bb63, type: 3}
+  - {fileID: 8490921936099837012, guid: 0111134fdeedb344bb3245cb6a511e26, type: 3}
   Wedge:
   - {fileID: 7880648915839048705, guid: baf11ac19ff4d834e90bdabecbbcac34, type: 3}
+  - {fileID: 8078035171936306903, guid: e75c1ed9bbcab5441bf87105d5c79a44, type: 3}
+  - {fileID: 8274283465048501584, guid: a3c4cba6a64e3c74091cdd850b08de08, type: 3}
   Peak:
   - {fileID: 7217211223015661428, guid: 06e00b37cbb7ffb4d979f667db3e98bb, type: 3}
+  - {fileID: 4587238433929970694, guid: f9484f261722d3d4094f885d20f51646, type: 3}
   MTLand:
   - {fileID: 4719865079742846278, guid: f47faefb41b05574c8d5e70148aa86a3, type: 3}
+  SnowForestGrass: {fileID: 2100000, guid: 2608c849b02c7b74589e44edd5ffd600, type: 2}
+  SnowForestStone: {fileID: 2100000, guid: f5ebe398e26bbc64a80c7e8a041fd82e, type: 2}
+  ForestGrass: {fileID: 2100000, guid: 6c7ea30d5bdcaf041ac3a3d3aa4b1de8, type: 2}
+  ForestStone: {fileID: 2100000, guid: 5eb9873ac1fd2fa429907442956d0b37, type: 2}
+  PlainGrass: {fileID: 2100000, guid: ebf1634e4f0664b46a2c6daf0dad9974, type: 2}
+  PlainStone: {fileID: 2100000, guid: 163f17bbe0b6dc44c979b151af38a1bf, type: 2}
+  DesertGrass: {fileID: 2100000, guid: df703927b6cd41843919e121fbbc5db2, type: 2}
+  DesertStone: {fileID: 2100000, guid: 2bd63e0d35f9a654198b9153b231fecb, type: 2}
 --- !u!4 &1664678916
 Transform:
   m_ObjectHideFlags: 0
