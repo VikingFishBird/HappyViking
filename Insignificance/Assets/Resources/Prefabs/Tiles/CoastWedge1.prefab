@@ -50,12 +50,10 @@ MonoBehaviour:
   downSide: 1
   rightSide: 1
   tileWeight: 0.05
-  tileLevel: 0
   Mountain: 0
   CoastOrWater: 1
-  Stair: 0
-  Land: 0
-  MountainEdge: 0
+  grass: 1
+  stone: -1
 --- !u!65 &4633689501505572562
 BoxCollider:
   m_ObjectHideFlags: 0

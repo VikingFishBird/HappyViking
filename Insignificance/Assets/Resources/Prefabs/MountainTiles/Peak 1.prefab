@@ -51,6 +51,8 @@ MonoBehaviour:
   tileWeight: 0
   Mountain: 1
   CoastOrWater: 0
+  grass: 1
+  stone: 0
 --- !u!1001 &7217211222481772471
 PrefabInstance:
   m_ObjectHideFlags: 0

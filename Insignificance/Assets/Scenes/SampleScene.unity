@@ -965,6 +965,12 @@ MonoBehaviour:
   PlainStone: {fileID: 2100000, guid: 163f17bbe0b6dc44c979b151af38a1bf, type: 2}
   DesertGrass: {fileID: 2100000, guid: df703927b6cd41843919e121fbbc5db2, type: 2}
   DesertStone: {fileID: 2100000, guid: 2bd63e0d35f9a654198b9153b231fecb, type: 2}
+  RainForestGrass: {fileID: 2100000, guid: 94549500d29df284bbe81a0f0719d25e, type: 2}
+  RainForestStone: {fileID: 2100000, guid: bdb94ea32bda03045bf40efda93f5904, type: 2}
+  SavannaGrass: {fileID: 2100000, guid: 91c9047e95bc22c43b196b373ef0f96a, type: 2}
+  SavannaStone: {fileID: 2100000, guid: 01e8f5baff28f0943a8562f2d989b144, type: 2}
+  TundraGrass: {fileID: 2100000, guid: 983608d89dd8b8a41a953951216ca461, type: 2}
+  TundraStone: {fileID: 2100000, guid: a84072da0daef00418c7d9312478f117, type: 2}
 --- !u!4 &1664678916
 Transform:
   m_ObjectHideFlags: 0

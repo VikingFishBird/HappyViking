@@ -33,6 +33,13 @@ public class MapGenerator : MonoBehaviour
     public Material DesertGrass;
     public Material DesertStone;
 
+    public Material RainForestGrass;
+    public Material RainForestStone;
+    public Material SavannaGrass;
+    public Material SavannaStone;
+    public Material TundraGrass;
+    public Material TundraStone;
+
     [Space]
     // The GameObject holding all the tiles.
     Transform mapHolder;
@@ -51,11 +58,23 @@ public class MapGenerator : MonoBehaviour
     static GameObject[] tileList;
 
     Transform[,] topTiles;
+    Transform[,,] mtTiles;
 
     // Boolean for the WFC completion.
     bool fullyCollapsed;
 
-    public enum Biome { SnowForest, Forest, Plains, Desert};
+    public enum Biome { SnowForest, Forest, Plains, Desert, Tundra, RainForest, Savanna};
+
+    Biome[,] BiomeMap = { { Biome.Tundra, Biome.Tundra, Biome.Tundra, Biome.Tundra, Biome.Desert, Biome.Desert, Biome.Desert, Biome.Desert, Biome.Desert, Biome.Desert },
+                          { Biome.Tundra, Biome.Tundra, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Desert, Biome.Desert, Biome.Desert },
+                          { Biome.Tundra, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Desert, Biome.Desert },
+                          { Biome.SnowForest, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Savanna, Biome.Savanna },
+                          { Biome.SnowForest, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Savanna, Biome.Savanna },
+                          { Biome.SnowForest, Biome.SnowForest, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Savanna, Biome.Savanna },
+                          { Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Savanna, Biome.Savanna },
+                          { Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest },
+                          { Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest },
+                          { Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest, Biome.RainForest }};
     
     // Start is called before the first frame update
     void Start()
@@ -86,6 +105,7 @@ public class MapGenerator : MonoBehaviour
         coordinates = new Coord[tiles.GetLength(0), tiles.GetLength(1)];
         coefficientMatrix = new List<Compatability>[tiles.GetLength(0), tiles.GetLength(1)];
         topTiles = new Transform[tiles.GetLength(0), tiles.GetLength(1)];
+        mtTiles = new Transform[5, tiles.GetLength(0), tiles.GetLength(1)];
         //heightMapArrays = new Transform[5, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
         
         // Reset fully collapsed bool value.
@@ -166,9 +186,12 @@ public class MapGenerator : MonoBehaviour
         Biome[,] biomes = GenerateBiomesArray();
         for(int x = 0; x < biomes.GetLength(0); x++) {
             for (int y = 0; y < biomes.GetLength(1); y++) {
-                Material[] mats = topTiles[x, y].GetChild(0).GetComponent<MeshRenderer>().materials;
+                MeshRenderer meshRenderer = tiles[x, y].GetChild(0).GetComponent<MeshRenderer>();
+                Material[] mats = meshRenderer.materials;
+                Tile tileComp = tileComps[x, y];
                 Material grass;
                 Material stone;
+
                 if(biomes[x,y] == Biome.SnowForest) {
                     grass = SnowForestGrass;
                     stone = SnowForestStone;
@@ -181,79 +204,78 @@ public class MapGenerator : MonoBehaviour
                     grass = PlainGrass;
                     stone = PlainStone;
                 }
+                else if (biomes[x, y] == Biome.Savanna) {
+                    grass = SavannaGrass;
+                    stone = SavannaStone;
+                }
+                else if (biomes[x, y] == Biome.RainForest) {
+                    grass = RainForestGrass;
+                    stone = RainForestStone;
+                }
+                else if (biomes[x, y] == Biome.Tundra) {
+                    grass = TundraGrass;
+                    stone = TundraStone;
+                }
                 else {
                     grass = DesertGrass;
                     stone = DesertStone;
                 }
 
-                if (mats.Length == 1) {
-                    mats = new Material[] { grass };
+                if (tileComp.grass != -1) {
+                    mats[tileComp.grass] = grass;
                 }
-                else if (mats.Length == 2) {
-                    if (mats[0].name.Equals("Grass")) {
-                        mats = new Material[] { grass, stone };
-                    }
-                    else {
-                        mats = new Material[] { stone, grass };
-                    }
+                if (tileComp.stone != -1) {
+                    mats[tileComp.stone] = stone;
                 }
 
-                topTiles[x, y].GetChild(0).GetComponent<MeshRenderer>().materials = mats;
+                tileComp.biome = biomes[x, y];
+                meshRenderer.materials = mats;
+
+                // Mts
+                for(int height = 0; height < 5; height++) {
+                    if(mtTiles[height, x, y] != null) {
+                        MeshRenderer mtMeshRenderer = mtTiles[height, x, y].GetChild(0).GetComponent<MeshRenderer>();
+                        Material[] matsMT = mtMeshRenderer.materials;
+                        Tile tileCompMT = mtTiles[height, x, y].GetComponent<Tile>();
+
+                        if (tileComp.grass != -1) {
+                            matsMT[tileCompMT.grass] = grass;
+                        }
+                        if (tileComp.stone != -1) {
+                            matsMT[tileCompMT.stone] = stone;
+                        }
+
+                        tileCompMT.biome = biomes[x, y];
+                        mtMeshRenderer.materials = matsMT;
+
+                    }
+                }
             }
         }
     }
     
-    #region Biomes and Texturing
+    #region Biomes
+    // Generates an array of Biomes
     private Biome[,] GenerateBiomesArray() {
         float[,] precipnoiseMap = GenerateNoiseMap(4, false);
         float[,] tempnoiseMap = GenerateNoiseMap(4, false);
-        string bioStr = "";
         Biome[,] biomes = new Biome[precipnoiseMap.GetLength(0), precipnoiseMap.GetLength(1)];
         for (int y = 0; y < biomes.GetLength(1); y++) {
             float basePrec = EvalPrecipitation((float)y / biomes.GetLength(1));
-            float baseTemp = EvalTemperature((float)y / biomes.GetLength(1));
+            float baseTemp = (float)y / biomes.GetLength(1);
             for (int x = 0; x < biomes.GetLength(0); x++) {
-                float prec = 0.4f * (precipnoiseMap[x, y] - 0.5f) + basePrec;
-                float temp = 0.4f * (tempnoiseMap[x, y] - 0.5f) + baseTemp;
-                if(prec < 0.5f && temp < 0.5f) {
-                    biomes[x, y] = Biome.Plains;
-                }
-                else if (prec > 0.5f && temp < 0.5f) {
-                    biomes[x, y] = Biome.SnowForest;
-                }
-                else if (prec < 0.5f && temp > 0.5f) {
-                    biomes[x, y] = Biome.Desert;
-                }
-                else {
-                    biomes[x, y] = Biome.Forest;
-                }
-                bioStr += precipnoiseMap[x, y] + " ";
+                int prec = Mathf.FloorToInt(Mathf.Clamp(0.2f * (precipnoiseMap[x, y] - 0.5f) + basePrec, 0.0f, 0.999f) * 10);
+                int temp = Mathf.FloorToInt(Mathf.Clamp(0.2f * (tempnoiseMap[x, y] - 0.5f) + baseTemp, 0.0f, 0.999f) *10);
+                biomes[x, y] = BiomeMap[prec, temp];
             }
-            bioStr += "\n";
         }
-
-        print(bioStr);
 
         return biomes;
 
     }
     
     private float EvalPrecipitation(float x) {
-        if(x < 0.25f) {
-            return 4 * x;
-        }
-        else if(x < 0.5f) {
-            return -4 * x + 2;
-        }
-        else if (x < 0.75f) {
-            return 4 * x - 2;
-        }
-        else {
-            return -4 * x + 4;
-        }
-    }
-    private float EvalTemperature(float x) {
-        if (x < 0.25f) {
+        if(x < 0.5f) {
             return 2 * x;
         }
         else {
@@ -332,7 +354,8 @@ public class MapGenerator : MonoBehaviour
                 for (int x = coords.x; x < mt.width + coords.x; x++) {
                     Transform[] block = dic[mt.blockArray[height, y - coords.y, x - coords.x].blockType];
                     if(block != null) {
-                        topTiles[x,y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height + 2, block[Random.Range(0, block.Length)], mt.blockArray[height, y - coords.y, x - coords.x].rotation, true);
+                        mtTiles[height, x ,y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, height + 2, block[Random.Range(0, block.Length)], mt.blockArray[height, y - coords.y, x - coords.x].rotation, true);
+                        topTiles[x, y] = mtTiles[height, x, y];
                     }
                 }
             }

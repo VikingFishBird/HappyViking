@@ -144,3 +144,5 @@ MonoBehaviour:
   tileWeight: 0
   Mountain: 1
   CoastOrWater: 0
+  grass: 0
+  stone: -1

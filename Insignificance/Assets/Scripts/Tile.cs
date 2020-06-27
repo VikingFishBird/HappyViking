@@ -16,4 +16,12 @@ public class Tile : MonoBehaviour
 
     public bool Mountain;
     public bool CoastOrWater;
+
+    public int grass;
+    public int stone;
+
+    public MapGenerator.Biome biome;
+
+    public Vector2[] potentialTreeLocations;
+
 }
