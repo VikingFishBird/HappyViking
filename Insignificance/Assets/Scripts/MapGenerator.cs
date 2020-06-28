@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UI;
 
-// Optimize: Combine Meshes, Create separate arrays for coastTileList and mtTileList
+// Optimize: Combine Meshes
 public class MapGenerator : MonoBehaviour
 {
     public Vector2 mapSize;
@@ -62,6 +63,7 @@ public class MapGenerator : MonoBehaviour
     // Prefab List
     static GameObject[] tileList;
 
+    Tile[,] tileComps;
     Transform[,] topTiles;
     Transform[,,] mtTiles;
 
@@ -122,7 +124,7 @@ public class MapGenerator : MonoBehaviour
         coefficientMatrix = new List<Compatability>[tiles.GetLength(0), tiles.GetLength(1)];
         topTiles = new Transform[tiles.GetLength(0), tiles.GetLength(1)];
         mtTiles = new Transform[5, tiles.GetLength(0), tiles.GetLength(1)];
-        //heightMapArrays = new Transform[5, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
+        tileComps = new Tile[tiles.GetLength(0), tiles.GetLength(1)];
 
         Dictionary<Biome, Transform[]> treeType = new Dictionary<Biome, Transform[]>() {
             { Biome.SnowForest, spruce},
@@ -164,26 +166,18 @@ public class MapGenerator : MonoBehaviour
         while (!fullyCollapsed) {
             int minx, miny;
             // Find the tile with the fewest possibilities
-            FindSeaLevelTileWithFewestPossibilities(out minx, out miny);
+            FindSeaLevelTileWithFewestPossibilities(out minx, out miny, out fullyCollapsed, out count);
+            if (fullyCollapsed)
+                break;
+
             // Set the specified tile
             SetTile(minx, miny);
             // Reset possibilities of surrounding tiles
             ResetCoeffecientMatrixSurroundingTile(minx, miny);
-            // Set Bool variable
-            fullyCollapsed = CheckIfCollapsed();
             // Prevent Endless Loop
             count++;
             if(count > 30000) {
                 break;
-            }
-        }
-
-        // Future Optimization: Create this array beforehand and use it in other methods to minimize .GetComp calls.
-        Tile[,] tileComps = new Tile[tiles.GetLength(0), tiles.GetLength(1)];
-        for(int x = 0; x < tileComps.GetLength(0); x++) {
-            for (int y = 0; y < tileComps.GetLength(1); y++) {
-                tileComps[x, y] = tiles[x, y].GetComponent<Tile>();
-                topTiles[x, y] = tiles[x, y];
             }
         }
 
@@ -256,16 +250,7 @@ public class MapGenerator : MonoBehaviour
 
                 tileComp.biome = biomes[x, y];
                 meshRenderer.materials = mats;
-
-                float chance = treeRate[tileComp.biome];
-                Transform[] _treeType = treeType[tileComp.biome];
-                for(int i = 0; i < tileComp.potentialTreeLocations.Length; i++) {
-                    if(Random.Range(0.0f, 1.0f) < chance) {
-                        Transform tree = Instantiate(_treeType[Random.Range(0, _treeType.Length)], new Vector3(coordinates[x,y].x + tileComp.potentialTreeLocations[i].x, 1f, coordinates[x,y].y + tileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
-                        tree.parent = tiles[x, y];
-                    }
-                }
-
+                
                 // Mts
                 for(int height = 0; height < 5; height++) {
                     if(mtTiles[height, x, y] != null) {
@@ -283,6 +268,16 @@ public class MapGenerator : MonoBehaviour
                         tileCompMT.biome = biomes[x, y];
                         mtMeshRenderer.materials = matsMT;
 
+                    }
+                    else if(height == 0) {
+                        float chance = treeRate[tileComp.biome];
+                        Transform[] _treeType = treeType[tileComp.biome];
+                        for (int i = 0; i < tileComp.potentialTreeLocations.Length; i++) {
+                            if (Random.Range(0.0f, 1.0f) < chance) {
+                                Transform tree = Instantiate(_treeType[Random.Range(0, _treeType.Length)], new Vector3(coordinates[x, y].x + tileComp.potentialTreeLocations[i].x, 1f, coordinates[x, y].y + tileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
+                                tree.parent = tiles[x, y];
+                            }
+                        }
                     }
                 }
             }
@@ -399,6 +394,7 @@ public class MapGenerator : MonoBehaviour
     }
     #endregion
 
+    #region SeaLevel WFC Methods    
     // Adds all valid matches of a certain tile to the CoefficientMatrix
     private void CheckValid(List<Compatability> matrix, int tileIndex, int x, int y) {
         // Future Optimization: Add all coast tiles at once by type. No need to iterate through 3 coast corners.
@@ -418,16 +414,16 @@ public class MapGenerator : MonoBehaviour
 
         // Set Neighbor sides
         if (y > 0 && tiles[x, y - 1] != null) {
-            upSide = tiles[x, y - 1].gameObject.GetComponent<Tile>().downSide;
+            upSide = tileComps[x, y - 1].downSide;
         }
         if (y < Mathf.RoundToInt(mapSize.y) - 1 && tiles[x, y + 1] != null) {
-            downSide = tiles[x, y + 1].gameObject.GetComponent<Tile>().upSide;
+            downSide = tileComps[x, y + 1].upSide;
         }
         if (x > 0 && tiles[x - 1, y] != null) {
-            leftSide = tiles[x - 1, y].gameObject.GetComponent<Tile>().rightSide;
+            leftSide = tileComps[x - 1, y].rightSide;
         }
         if (x < Mathf.RoundToInt(mapSize.x) - 1 && tiles[x + 1, y] != null) {
-            rightSide = tiles[x + 1, y].gameObject.GetComponent<Tile>().leftSide;
+            rightSide = tileComps[x + 1, y].leftSide;
         }
 
         // Adjust/Prepare Neighbor sides.
@@ -486,6 +482,7 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Selects a random valid tile and places it.
+    // Maybe Optimization: Add a tileListComps Array.
     private void SetTile(int x, int y) {
         float sum = 0f;
         for (int i = 0; i < coefficientMatrix[x, y].Count; i++) {
@@ -498,18 +495,22 @@ public class MapGenerator : MonoBehaviour
             if (rand < cumulativeSum) {
                 float rot = coefficientMatrix[x, y][i].rotation;
                 tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, 1, tileList[coefficientMatrix[x, y][i].index].transform, rot);
+                topTiles[x, y] = tiles[x, y];
+                tileComps[x, y] = tiles[x, y].GetComponent<Tile>();
                 coefficientMatrix[x, y].Clear();
                 return;
             }
         }
     }
     
-    #region SeaLevel WFC Methods    
     // Returns the x/y index of the tile with the fewest possibilities.
-    private void FindSeaLevelTileWithFewestPossibilities(out int minx, out int miny) {
+    private void FindSeaLevelTileWithFewestPossibilities(out int minx, out int miny, out bool fullyCollapsed, out int count) {
         int min = int.MaxValue;
         int xIndex = 0;
         int yIndex = 0;
+        count = 0;
+
+        fullyCollapsed = true;
 
         List<int> xZeros = new List<int>();
         List<int> yZeros = new List<int>();
@@ -517,6 +518,8 @@ public class MapGenerator : MonoBehaviour
         for (int x = 0; x < coefficientMatrix.GetLength(0); x++) {
             for (int y = 0; y < coefficientMatrix.GetLength(1); y++) {
                 if (tiles[x, y] == null) {
+                    fullyCollapsed = false;
+                    count++;
                     if (coefficientMatrix[x, y].Count > 0 && coefficientMatrix[x, y].Count < min) {
                         min = coefficientMatrix[x, y].Count;
                         xIndex = x;
@@ -652,7 +655,8 @@ public class MapGenerator : MonoBehaviour
 
     }
 
-    // Resets the coefficient matrix at a given tile.
+    // Resets the coefficient matrix at a given tile. 
+    // Optimization: Create separate methods for Removing options and resetting.
     private void ResetCoeffecientMatrixAtTile(int x, int y) {
         coefficientMatrix[x, y].Clear();
         for (int i = 0; i < tileList.Length; i++) {
@@ -660,17 +664,6 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    // Returns true if there are no gaps. False otherwise.
-    private bool CheckIfCollapsed() {
-        for(int x = 0; x < tiles.GetLength(0); x++) {
-            for (int y = 0; y < tiles.GetLength(1); y++) {
-                if(tiles[x, y] == null) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
     #endregion
 
     #region Noise
@@ -746,6 +739,8 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < coordinates.GetLength(1); y++) {
                 if(GetHeightLevelFromPerlin(perlin[x, y])) {
                     tiles[x, y] = PlaceCubeAtCoord(coordinates[x, y], mapHolder, 1, waterTile, 0f);
+                    topTiles[x, y] = tiles[x, y];
+                    tileComps[x, y] = tiles[x, y].GetComponent<Tile>();
                 }
             }
         }
