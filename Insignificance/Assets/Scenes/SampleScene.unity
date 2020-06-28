@@ -930,7 +930,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bce5d73661422234999aa22935a4de48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSize: {x: 40, y: 40}
+  mapSize: {x: 100, y: 100}
   noiseMapScale: 16
   fallOffMapPower: 7
   waterRate: 0.25
@@ -971,6 +971,17 @@ MonoBehaviour:
   SavannaStone: {fileID: 2100000, guid: 01e8f5baff28f0943a8562f2d989b144, type: 2}
   TundraGrass: {fileID: 2100000, guid: 983608d89dd8b8a41a953951216ca461, type: 2}
   TundraStone: {fileID: 2100000, guid: a84072da0daef00418c7d9312478f117, type: 2}
+  spruce:
+  - {fileID: 6773263416135004650, guid: cb05c074153b34d4dbf1abe74917cf77, type: 3}
+  - {fileID: 8747861336655558706, guid: a4d6cb2b10e45b940993ceff8a0813e7, type: 3}
+  - {fileID: 6720401295545442076, guid: 0af31ab4867e329458d35bae988302a5, type: 3}
+  oak:
+  - {fileID: 8875043810572793528, guid: 7fd148230ed426440bef74c28f6353c5, type: 3}
+  - {fileID: 508189654995227332, guid: eb7b4114cb885f8438c837dde63a94cb, type: 3}
+  - {fileID: 1235103959632744814, guid: 6dbcae473bbc789469abedb97a222fd0, type: 3}
+  desert:
+  - {fileID: 6371090403769834259, guid: c92d2ae44e38fc74ca91548f5cb8f588, type: 3}
+  - {fileID: 6658416149762167435, guid: a528a1a2bfd07df42b3e4f3333adf3b2, type: 3}
 --- !u!4 &1664678916
 Transform:
   m_ObjectHideFlags: 0
@@ -979,7 +990,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1664678914}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

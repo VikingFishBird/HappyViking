@@ -41,6 +41,11 @@ public class MapGenerator : MonoBehaviour
     public Material TundraStone;
 
     [Space]
+    public Transform[] spruce;
+    public Transform[] oak;
+    public Transform[] desert;
+
+    [Space]
     // The GameObject holding all the tiles.
     Transform mapHolder;
 
@@ -67,14 +72,25 @@ public class MapGenerator : MonoBehaviour
 
     Biome[,] BiomeMap = { { Biome.Tundra, Biome.Tundra, Biome.Tundra, Biome.Tundra, Biome.Desert, Biome.Desert, Biome.Desert, Biome.Desert, Biome.Desert, Biome.Desert },
                           { Biome.Tundra, Biome.Tundra, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Desert, Biome.Desert, Biome.Desert },
-                          { Biome.Tundra, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Desert, Biome.Desert },
-                          { Biome.SnowForest, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Savanna, Biome.Savanna },
-                          { Biome.SnowForest, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Savanna, Biome.Savanna },
+                          { Biome.Tundra, Biome.Tundra, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Desert, Biome.Desert },
+                          { Biome.Tundra, Biome.Tundra, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Savanna, Biome.Savanna },
+                          { Biome.Tundra, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Savanna, Biome.Savanna },
                           { Biome.SnowForest, Biome.SnowForest, Biome.Plains, Biome.Plains, Biome.Plains, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Savanna, Biome.Savanna },
                           { Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Savanna, Biome.Savanna },
-                          { Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest },
                           { Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest },
-                          { Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest, Biome.RainForest }};
+                          { Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest },
+                          { Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest, Biome.RainForest }};
+
+    Dictionary<Biome, float> treeRate = new Dictionary<Biome, float>() {
+        { Biome.SnowForest, 0.08f},
+        { Biome.Forest, 0.08f},
+        { Biome.Desert, 0.01f},
+        { Biome.Plains, 0.03f},
+        { Biome.Tundra, 0.01f},
+        { Biome.RainForest, 0.15f},
+        { Biome.Savanna, 0.03f}
+    };
+
     
     // Start is called before the first frame update
     void Start()
@@ -107,7 +123,17 @@ public class MapGenerator : MonoBehaviour
         topTiles = new Transform[tiles.GetLength(0), tiles.GetLength(1)];
         mtTiles = new Transform[5, tiles.GetLength(0), tiles.GetLength(1)];
         //heightMapArrays = new Transform[5, Mathf.RoundToInt(mapSize.x), Mathf.RoundToInt(mapSize.y)];
-        
+
+        Dictionary<Biome, Transform[]> treeType = new Dictionary<Biome, Transform[]>() {
+            { Biome.SnowForest, spruce},
+            { Biome.Forest, spruce},
+            { Biome.Desert, desert},
+            { Biome.Plains, oak},
+            { Biome.Tundra, oak},
+            { Biome.RainForest, spruce},
+            { Biome.Savanna, oak}
+        };
+
         // Reset fully collapsed bool value.
         fullyCollapsed = false;
 
@@ -231,6 +257,15 @@ public class MapGenerator : MonoBehaviour
                 tileComp.biome = biomes[x, y];
                 meshRenderer.materials = mats;
 
+                float chance = treeRate[tileComp.biome];
+                Transform[] _treeType = treeType[tileComp.biome];
+                for(int i = 0; i < tileComp.potentialTreeLocations.Length; i++) {
+                    if(Random.Range(0.0f, 1.0f) < chance) {
+                        Transform tree = Instantiate(_treeType[Random.Range(0, _treeType.Length)], new Vector3(coordinates[x,y].x + tileComp.potentialTreeLocations[i].x, 1f, coordinates[x,y].y + tileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
+                        tree.parent = tiles[x, y];
+                    }
+                }
+
                 // Mts
                 for(int height = 0; height < 5; height++) {
                     if(mtTiles[height, x, y] != null) {
@@ -252,6 +287,7 @@ public class MapGenerator : MonoBehaviour
                 }
             }
         }
+
     }
     
     #region Biomes
