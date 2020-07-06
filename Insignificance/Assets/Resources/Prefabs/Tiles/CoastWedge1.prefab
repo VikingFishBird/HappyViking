@@ -16,7 +16,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &4754882219808406271
 Transform:
@@ -54,6 +54,8 @@ MonoBehaviour:
   CoastOrWater: 1
   grass: 1
   stone: -1
+  biome: 0
+  potentialTreeLocations: []
 --- !u!65 &4633689501505572562
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -152,7 +154,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 3bac9e4c533b57a4ba4efa832c39fa2c,
         type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 4294967295
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3bac9e4c533b57a4ba4efa832c39fa2c, type: 3}
