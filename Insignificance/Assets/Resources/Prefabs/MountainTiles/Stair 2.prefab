@@ -53,6 +53,10 @@ MonoBehaviour:
   CoastOrWater: 0
   grass: 1
   stone: 0
+  coast: -1
+  water: -1
+  biome: 0
+  potentialTreeLocations: []
 --- !u!1001 &8226512183401103298
 PrefabInstance:
   m_ObjectHideFlags: 0

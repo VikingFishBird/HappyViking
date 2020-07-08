@@ -1075,8 +1075,8 @@ MonoBehaviour:
   PlainStone: {fileID: 2100000, guid: 163f17bbe0b6dc44c979b151af38a1bf, type: 2}
   DesertGrass: {fileID: 2100000, guid: df703927b6cd41843919e121fbbc5db2, type: 2}
   DesertStone: {fileID: 2100000, guid: 2bd63e0d35f9a654198b9153b231fecb, type: 2}
-  Water: {fileID: 0}
-  Coast: {fileID: 0}
+  Water: {fileID: 2100000, guid: 31f937e4947ea1e4c82e014f3dff8bda, type: 2}
+  Coast: {fileID: 2100000, guid: 60691fce0cdcb414b858fec7d73aa18d, type: 2}
   RainForestGrass: {fileID: 2100000, guid: 94549500d29df284bbe81a0f0719d25e, type: 2}
   RainForestStone: {fileID: 2100000, guid: bdb94ea32bda03045bf40efda93f5904, type: 2}
   SavannaGrass: {fileID: 2100000, guid: 91c9047e95bc22c43b196b373ef0f96a, type: 2}

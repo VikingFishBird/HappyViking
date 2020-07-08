@@ -19,6 +19,8 @@ public class Tile : MonoBehaviour
 
     public int grass;
     public int stone;
+    public int coast;
+    public int water;
 
     public MapGenerator.Biome biome;
 

@@ -54,6 +54,8 @@ MonoBehaviour:
   CoastOrWater: 1
   grass: 1
   stone: -1
+  coast: 2
+  water: 0
   biome: 0
   potentialTreeLocations: []
 --- !u!65 &4633689501505572562

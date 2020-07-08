@@ -15,6 +15,7 @@ public class MapGenerator : MonoBehaviour
     public float waterRate;
     public float mtRate;
     public int chunkSize;
+    public bool trees;
 
     [Space]
     [Header("Tile Prefabs")]
@@ -88,13 +89,13 @@ public class MapGenerator : MonoBehaviour
                           { Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest },
                           { Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.SnowForest, Biome.Forest, Biome.Forest, Biome.Forest, Biome.RainForest, Biome.RainForest, Biome.RainForest }};
     Dictionary<Biome, float> treeRate = new Dictionary<Biome, float>() {
-        { Biome.SnowForest, 0.08f},
-        { Biome.Forest, 0.08f},
-        { Biome.Desert, 0.01f},
-        { Biome.Plains, 0.03f},
-        { Biome.Tundra, 0.01f},
-        { Biome.RainForest, 0.15f},
-        { Biome.Savanna, 0.03f}
+        { Biome.SnowForest, 0.04f},
+        { Biome.Forest, 0.04f},
+        { Biome.Desert, 0.02f},
+        { Biome.Plains, 0.01f},
+        { Biome.Tundra, 0.002f},
+        { Biome.RainForest, 0.08f},
+        { Biome.Savanna, 0.01f}
     };
     Dictionary<Biome, Transform[]> treeType; // Returns the tree type of a biome.
     Dictionary<Biome, int> biomeIDs = new Dictionary<Biome, int>() {
@@ -105,10 +106,10 @@ public class MapGenerator : MonoBehaviour
         { Biome.Tundra, 4 },
         { Biome.Desert, 5 },
         { Biome.Savanna, 6 },
-        { Biome.Water, 7 },
-        { Biome.Coast, 8 },
+        { Biome.Water, 14 },
+        { Biome.Coast, 15 },
     };
-    Dictionary<Biome, Material> biomeMaterial;
+    Dictionary<int, Material> biomeIDToMaterial;
 
     // Start is called before the first frame update
     void Start()
@@ -126,16 +127,23 @@ public class MapGenerator : MonoBehaviour
             { Biome.RainForest, spruce},
             { Biome.Savanna, oak}
         };
-        biomeMaterial = new Dictionary<Biome, Material>() {
-            { Biome.Plains, PlainGrass},
-            { Biome.Desert, DesertGrass},
-            { Biome.Forest, ForestGrass},
-            { Biome.RainForest, RainForestGrass},
-            { Biome.SnowForest, SnowForestGrass},
-            { Biome.Tundra, TundraGrass},
-            { Biome.Savanna, SavannaGrass},
-            { Biome.Water, Water},
-            { Biome.Coast, Coast}
+        biomeIDToMaterial = new Dictionary<int, Material>() {
+            { 0, PlainGrass},
+            { 1, ForestGrass},
+            { 2, SnowForestGrass},
+            { 3, RainForestGrass},
+            { 4, TundraGrass},
+            { 5, DesertGrass},
+            { 6, SavannaGrass},
+            { 7, PlainStone},
+            { 8, ForestStone},
+            { 9, SnowForestStone},
+            { 10, RainForestStone},
+            { 11, TundraStone},
+            { 12, DesertStone},
+            { 13, SavannaStone},
+            { 14, Water},
+            { 15, Coast}
         };
 
 
@@ -234,23 +242,6 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        /*
-        // BiomeMeshArrays
-        List<Mesh> desertLand = new List<Mesh>();
-        List<Mesh> desertStone = new List<Mesh>();
-        List<Mesh> plainsLand = new List<Mesh>();
-        List<Mesh> plainsStone = new List<Mesh>();
-        List<Mesh> forestLand = new List<Mesh>();
-        List<Mesh> forestStone = new List<Mesh>();
-        List<Mesh> snowForestLand = new List<Mesh>();
-        List<Mesh> snowForestStone = new List<Mesh>();
-        List<Mesh> savannaLand = new List<Mesh>();
-        List<Mesh> savannaStone = new List<Mesh>();
-        List<Mesh> tundraLand = new List<Mesh>();
-        List<Mesh> tundraStone = new List<Mesh>();
-        List<Mesh> rainForestLand = new List<Mesh>();
-        List<Mesh> rainForestStone = new List<Mesh>();*/
-
         // Biomes
         Biome[,] biomes = GenerateBiomesArray();
         for(int x = 0; x < biomes.GetLength(0); x++) {
@@ -258,19 +249,74 @@ public class MapGenerator : MonoBehaviour
                 MeshRenderer meshRenderer = tiles[x, y].GetChild(0).GetComponent<MeshRenderer>();
                 Material[] mats = meshRenderer.materials;
                 Tile tileComp = tileComps[x, y];
-                //Material grass;
-                //Material stone;
-                //List<Mesh> grassMeshList;
-                //List<Mesh> stoneMeshList;
 
                 int chunkX = x / chunkSize;
                 int chunkY = y / chunkSize;
+
+                tiles[x, y].parent = chunks[chunkX, chunkY].tileStorage.transform;
+                tileComp.biome = biomes[x, y];
+
+                for (int height = 0; height < 5; height++) {
+                    if (mtTiles[height, x, y] != null) {
+                        mtTiles[height, x, y].parent = chunks[chunkX, chunkY].tileStorage.transform;
+                        mtTiles[height, x, y].GetComponent<Tile>().biome = biomes[x, y];
+                    }
+                    else if (trees && (height == 0 || (height > 0 && mtTiles[height - 1, x, y] != null))) { // TREES
+                        float chance = treeRate[tileComp.biome];
+                        Transform[] _treeType = treeType[tileComp.biome];
+                        for (int i = 0; i < tileComp.potentialTreeLocations.Length; i++) {
+                            if (Random.Range(0.0f, 1.0f) < chance) {
+                                Transform tree = Instantiate(_treeType[Random.Range(0, _treeType.Length)], new Vector3(coordinates[x, y].x + tileComp.potentialTreeLocations[i].x, 1f, coordinates[x, y].y + tileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
+                                tree.parent = mapHolder;
+                            }
+                        }
+                    }
+                }
+
+                #region OldBiomeCode
+                /*
                 int chunkBiomeIndex = biomeIDs[biomes[x, y]];
 
                 tiles[x, y].parent = chunks[chunkX, chunkY].gameObjects[chunkBiomeIndex].transform;
-                chunks[chunkX, chunkY].gameObjects[chunkBiomeIndex].GetComponent<MeshRenderer>().material = biomeMaterial[biomes[x, y]];
 
-                #region OldBiomeCode
+                if (tileComp.grass != -1) {
+                    chunks[chunkX, chunkY].gameObjects[chunkBiomeIndex].GetComponent<MeshRenderer>().material = biomeMaterial[biomes[x, y]];
+                }
+                if (tileComp.coast != -1) {
+                    chunks[chunkX, chunkY].gameObjects[biomeIDs[Biome.Coast]].GetComponent<MeshRenderer>().material = Coast;
+                }
+                if (tileComp.water != -1) {
+                    chunks[chunkX, chunkY].gameObjects[biomeIDs[Biome.Water]].GetComponent<MeshRenderer>().material = Water;
+                }
+                
+                // Mountains / Trees
+                for (int height = 0; height < 5; height++) {
+                    if (mtTiles[height, x, y] != null) {
+                        MeshRenderer mtMeshRenderer = mtTiles[height, x, y].GetChild(0).GetComponent<MeshRenderer>();
+                        Material[] matsMT = mtMeshRenderer.materials;
+                        Tile tileCompMT = mtTiles[height, x, y].GetComponent<Tile>();
+
+                        if (tileCompMT.grass != -1) {
+                            chunks[chunkX, chunkY].gameObjects[chunkBiomeIndex].GetComponent<MeshRenderer>().material = biomeMaterial[biomes[x, y]];
+                        }
+                        if (tileCompMT.stone != -1) {
+                            chunks[chunkX, chunkY].gameObjects[7 + chunkBiomeIndex].GetComponent<MeshRenderer>().material = biomeMaterial[7 + biomes[x, y]];
+                        }
+
+                    }
+                    else if (height == 0) { // TREES
+                        float chance = treeRate[tileComp.biome];
+                        Transform[] _treeType = treeType[tileComp.biome];
+                        for (int i = 0; i < tileComp.potentialTreeLocations.Length; i++) {
+                            if (Random.Range(0.0f, 1.0f) < chance) {
+                                Transform tree = Instantiate(_treeType[Random.Range(0, _treeType.Length)], new Vector3(coordinates[x, y].x + tileComp.potentialTreeLocations[i].x, 1f, coordinates[x, y].y + tileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
+                                tree.parent = tiles[x, y];
+                            }
+                        }
+                    }
+                }
+                */
+
                 /*
                 if(biomes[x,y] == Biome.SnowForest) {
                     grass = SnowForestGrass;
@@ -368,22 +414,50 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        for(int x = 0; x < chunks.GetLength(0); x++) {
+       for (int x = 0; x < chunks.GetLength(0); x++) {
             for (int y = 0; y < chunks.GetLength(1); y++) {
-                for(int i = 0; i < chunks[x,y].gameObjects.Length; i++) {
-                    GameObject obj = chunks[x, y].gameObjects[i];
-                    MeshFilter[] meshFilters = obj.GetComponentsInChildren<MeshFilter>();
-                    //Tile[] tileComps = obj.GetComponentsInChildren<Tile>();
-                    CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+                List<CombineInstance>[] combineList = new List<CombineInstance>[chunks[x, y].gameObjects.Length];
+                for(int i = 0; i < combineList.Length; i++) {
+                    combineList[i] = new List<CombineInstance>();
+                }
 
-                    for(int j = 0; j < meshFilters.Length; j++) {
-                        combine[j].mesh = meshFilters[j].mesh.GetSubmesh(0);
-                        combine[j].transform = meshFilters[j].transform.localToWorldMatrix;
-                        meshFilters[j].gameObject.SetActive(false);
+                foreach(Transform tile in chunks[x, y].tileStorage.transform) {
+                    Tile tileComp = tile.GetComponent<Tile>();
+                    int chunkBiomeIndex = biomeIDs[tileComp.biome];
+
+                    if (tileComp.grass != -1) {
+                        CombineInstance combineInstance = new CombineInstance();
+                        combineInstance.mesh = tile.GetChild(0).GetComponent<MeshFilter>().mesh.GetSubmesh(tileComp.grass);
+                        combineInstance.transform = tile.GetChild(0).localToWorldMatrix;
+                        combineList[chunkBiomeIndex].Add(combineInstance);
+                    }
+                    if (tileComp.stone != -1) {
+                        CombineInstance combineInstance = new CombineInstance();
+                        combineInstance.mesh = tile.GetChild(0).GetComponent<MeshFilter>().mesh.GetSubmesh(tileComp.stone);
+                        combineInstance.transform = tile.GetChild(0).localToWorldMatrix;
+                        combineList[chunkBiomeIndex + 7].Add(combineInstance);
+                    }
+                    if (tileComp.coast != -1) {
+                        CombineInstance combineInstance = new CombineInstance();
+                        combineInstance.mesh = tile.GetChild(0).GetComponent<MeshFilter>().mesh.GetSubmesh(tileComp.coast);
+                        combineInstance.transform = tile.GetChild(0).localToWorldMatrix;
+                        combineList[15].Add(combineInstance);
+                    }
+                    if (tileComp.water != -1) {
+                        CombineInstance combineInstance = new CombineInstance();
+                        combineInstance.mesh = tile.GetChild(0).GetComponent<MeshFilter>().mesh.GetSubmesh(tileComp.water);
+                        combineInstance.transform = tile.GetChild(0).localToWorldMatrix;
+                        combineList[14].Add(combineInstance);
                     }
 
+                    tile.gameObject.SetActive(false);
+                }
+
+                for(int i = 0; i < chunks[x,y].gameObjects.Length; i++) {
+                    GameObject obj = chunks[x, y].gameObjects[i];
+
                     obj.transform.GetComponent<MeshFilter>().mesh = new Mesh();
-                    obj.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, true, true);
+                    obj.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combineList[i].ToArray(), true, true);
                     obj.SetActive(true);
                 }
             }
@@ -391,12 +465,7 @@ public class MapGenerator : MonoBehaviour
         for (int x = 0; x < chunks.GetLength(0); x++) {
             for (int y = 0; y < chunks.GetLength(1); y++) {
                 for (int i = 0; i < chunks[x, y].gameObjects.Length; i++) {
-                    if(chunks[x, y].gameObjects[i].transform.childCount > 0) {
-
-                    }
-                    else {
-                        Destroy(chunks[x, y].gameObjects[i]);
-                    }
+                    chunks[x, y].gameObjects[i].GetComponent<MeshRenderer>().material = biomeIDToMaterial[i];
                 }
             }
         }
@@ -933,10 +1002,14 @@ public class MapGenerator : MonoBehaviour
     class Chunk {
         public GameObject[] gameObjects;
         public GameObject chunkObject;
+        public GameObject tileStorage;
 
         public Chunk(Transform parent) {
             chunkObject = new GameObject("Chunk");
             chunkObject.transform.parent = parent;
+
+            tileStorage = new GameObject("Tiles");
+            tileStorage.transform.parent = chunkObject.transform;
 
             gameObjects = new GameObject[] { new GameObject("PlainsCombined"),
                                              new GameObject("ForestCombined"),
@@ -945,6 +1018,13 @@ public class MapGenerator : MonoBehaviour
                                              new GameObject("TundraCombined"),
                                              new GameObject("DesertCombined"),
                                              new GameObject("SavannaCombined"),
+                                             new GameObject("PlainsStoneCombined"),
+                                             new GameObject("ForestStoneCombined"),
+                                             new GameObject("SnowForestStoneCombined"),
+                                             new GameObject("RainForestStoneCombined"),
+                                             new GameObject("TundraStoneCombined"),
+                                             new GameObject("DesertStoneCombined"),
+                                             new GameObject("SavannaStoneCombined"),
                                              new GameObject("WaterCombined"),
                                              new GameObject("CoastCombined")};
             for(int i = 0; i < gameObjects.Length; i++) {
