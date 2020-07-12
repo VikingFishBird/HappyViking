@@ -326,7 +326,12 @@ public class MapGenerator : MonoBehaviour
         for (int x = 0; x < chunks.GetLength(0); x++) {
             for (int y = 0; y < chunks.GetLength(1); y++) {
                 for (int i = 0; i < chunks[x, y].gameObjects.Length; i++) {
-                    chunks[x, y].gameObjects[i].GetComponent<MeshRenderer>().material = biomeIDToMaterial[i];
+                    if(chunks[x, y].gameObjects[i].GetComponent<MeshFilter>().mesh.triangles.Length > 0) {
+                        chunks[x, y].gameObjects[i].GetComponent<MeshRenderer>().material = biomeIDToMaterial[i];
+                    }
+                    else {
+                        Destroy(chunks[x, y].gameObjects[i]);
+                    }
                 }
             }
         }
