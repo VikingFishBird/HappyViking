@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1.59
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: e222162ddb8d34547a133b673221b195, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 4067de1a02072244798361060c5e7325, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.29649642, g: 0.24468085, b: 0.22919765, a: 1}
+  m_IndirectSpecularColor: {r: 0.54439956, g: 0.5070023, b: 0.5242686, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2062,12 +2062,8 @@ MonoBehaviour:
   TundraStone: {fileID: 2100000, guid: a84072da0daef00418c7d9312478f117, type: 2}
   spruce:
   - {fileID: 6773263416135004650, guid: cb05c074153b34d4dbf1abe74917cf77, type: 3}
-  - {fileID: 8747861336655558706, guid: a4d6cb2b10e45b940993ceff8a0813e7, type: 3}
-  - {fileID: 6720401295545442076, guid: 0af31ab4867e329458d35bae988302a5, type: 3}
   oak:
   - {fileID: 8875043810572793528, guid: 7fd148230ed426440bef74c28f6353c5, type: 3}
-  - {fileID: 508189654995227332, guid: eb7b4114cb885f8438c837dde63a94cb, type: 3}
-  - {fileID: 1235103959632744814, guid: 6dbcae473bbc789469abedb97a222fd0, type: 3}
   desert:
   - {fileID: 6371090403769834259, guid: c92d2ae44e38fc74ca91548f5cb8f588, type: 3}
   - {fileID: 6658416149762167435, guid: a528a1a2bfd07df42b3e4f3333adf3b2, type: 3}
