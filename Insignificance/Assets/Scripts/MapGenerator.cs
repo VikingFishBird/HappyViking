@@ -96,6 +96,15 @@ public class MapGenerator : MonoBehaviour {
         { Biome.RainForest, 0.08f},
         { Biome.Savanna, 0.01f}
     };
+    Dictionary<Biome, float> rockRate = new Dictionary<Biome, float>() {
+        { Biome.SnowForest, 0.05f},
+        { Biome.Forest, 0.05f},
+        { Biome.Desert, 0.03f},
+        { Biome.Plains, 0.03f},
+        { Biome.Tundra, 0.003f},
+        { Biome.RainForest, 0.05f},
+        { Biome.Savanna, 0.05f}
+    };
     Dictionary<Biome, Transform[]> treeType; // Returns the tree type of a biome.
     Dictionary<Biome, int> biomeIDs = new Dictionary<Biome, int>() {
         { Biome.Plains, 0 },
@@ -109,6 +118,7 @@ public class MapGenerator : MonoBehaviour {
         { Biome.Coast, 15 },
     };
     Dictionary<int, Material> biomeIDToMaterial;
+    public Transform[] rocks;
 
     // Start is called before the first frame update
     void Start() {
@@ -273,13 +283,18 @@ public class MapGenerator : MonoBehaviour {
                             offset = 0.375f;
                         }
 
-                        float chance = treeRate[treeTileComp.biome];
+                        float treeChance = treeRate[treeTileComp.biome];
+                        float rockChance = rockRate[treeTileComp.biome];
                         Transform[] _treeType = treeType[treeTileComp.biome];
 
                         for (int i = 0; i < treeTileComp.potentialTreeLocations.Length; i++) {
-                            if (Random.Range(0.0f, 1.0f) < chance) {
+                            if (Random.Range(0.0f, 1.0f) < treeChance) {
                                 Transform tree = Instantiate(_treeType[Random.Range(0, _treeType.Length)], new Vector3(coordinates[x, y].x + treeTileComp.potentialTreeLocations[i].x, tileTransform.position.y + offset, coordinates[x, y].y + treeTileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
                                 tree.parent = mapHolder;
+                            }
+                            if (Random.Range(0.0f, 1.0f) < rockChance) {
+                                Transform rock = Instantiate(rocks[Random.Range(0, rocks.Length)], new Vector3(coordinates[x, y].x + treeTileComp.potentialTreeLocations[i].x, tileTransform.position.y + offset, coordinates[x, y].y + treeTileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
+                                rock.parent = mapHolder;
                             }
                         }
                     }

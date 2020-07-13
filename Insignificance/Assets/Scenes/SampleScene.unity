@@ -1062,7 +1062,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &768139740
 Transform:
   m_ObjectHideFlags: 0
@@ -1111,7 +1111,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 375adf37fbf60824eb9ec1e9f6777249, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.509
+  m_Volume: 0.25
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -2067,6 +2067,9 @@ MonoBehaviour:
   desert:
   - {fileID: 6371090403769834259, guid: c92d2ae44e38fc74ca91548f5cb8f588, type: 3}
   - {fileID: 6658416149762167435, guid: a528a1a2bfd07df42b3e4f3333adf3b2, type: 3}
+  rocks:
+  - {fileID: 6854355637126552387, guid: 1fa98f7f96ef56042850e07a9e66fb62, type: 3}
+  - {fileID: 2272909831295238381, guid: f1aab5d373587ae4381c9ebb6d4f8710, type: 3}
 --- !u!4 &1664678916
 Transform:
   m_ObjectHideFlags: 0
