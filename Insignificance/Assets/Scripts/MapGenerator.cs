@@ -97,14 +97,24 @@ public class MapGenerator : MonoBehaviour {
         { Biome.Savanna, 0.01f}
     };
     Dictionary<Biome, float> rockRate = new Dictionary<Biome, float>() {
-        { Biome.SnowForest, 0.05f},
-        { Biome.Forest, 0.05f},
-        { Biome.Desert, 0.03f},
-        { Biome.Plains, 0.03f},
-        { Biome.Tundra, 0.003f},
-        { Biome.RainForest, 0.05f},
+        { Biome.SnowForest, 0.025f},
+        { Biome.Forest, 0.025f},
+        { Biome.Desert, 0.015f},
+        { Biome.Plains, 0.015f},
+        { Biome.Tundra, 0.0015f},
+        { Biome.RainForest, 0.025f},
+        { Biome.Savanna, 0.025f}
+    };
+    Dictionary<Biome, float> grassRate = new Dictionary<Biome, float>() {
+        { Biome.SnowForest, 0.025f},
+        { Biome.Forest, 0.075f},
+        { Biome.Desert, 0f},
+        { Biome.Plains, 0.075f},
+        { Biome.Tundra, 0f},
+        { Biome.RainForest, 0.10f},
         { Biome.Savanna, 0.05f}
     };
+
     Dictionary<Biome, Transform[]> treeType; // Returns the tree type of a biome.
     Dictionary<Biome, int> biomeIDs = new Dictionary<Biome, int>() {
         { Biome.Plains, 0 },
@@ -119,6 +129,7 @@ public class MapGenerator : MonoBehaviour {
     };
     Dictionary<int, Material> biomeIDToMaterial;
     public Transform[] rocks;
+    public Transform[] grass;
 
     // Start is called before the first frame update
     void Start() {
@@ -285,6 +296,7 @@ public class MapGenerator : MonoBehaviour {
 
                         float treeChance = treeRate[treeTileComp.biome];
                         float rockChance = rockRate[treeTileComp.biome];
+                        float grassChance = grassRate[treeTileComp.biome];
                         Transform[] _treeType = treeType[treeTileComp.biome];
 
                         for (int i = 0; i < treeTileComp.potentialTreeLocations.Length; i++) {
@@ -295,6 +307,10 @@ public class MapGenerator : MonoBehaviour {
                             if (Random.Range(0.0f, 1.0f) < rockChance) {
                                 Transform rock = Instantiate(rocks[Random.Range(0, rocks.Length)], new Vector3(coordinates[x, y].x + treeTileComp.potentialTreeLocations[i].x, tileTransform.position.y + offset, coordinates[x, y].y + treeTileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
                                 rock.parent = mapHolder;
+                            }
+                            if (Random.Range(0.0f, 1.0f) < grassChance) {
+                                Transform grassTransform = Instantiate(grass[Random.Range(0, rocks.Length)], new Vector3(coordinates[x, y].x + treeTileComp.potentialTreeLocations[i].x, tileTransform.position.y + offset, coordinates[x, y].y + treeTileComp.potentialTreeLocations[i].y), Quaternion.Euler(new Vector3(0, Random.Range(0.0f, 360.0f), 0)));
+                                grassTransform.parent = mapHolder;
                             }
                         }
                     }

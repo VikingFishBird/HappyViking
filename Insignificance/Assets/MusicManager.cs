@@ -26,7 +26,7 @@ public class MusicManager : MonoBehaviour
     // Update is called once per frame
     void Update() {
         if (!audioSource.isPlaying) {
-            int rand = Random.Range(0, clips.Length - 1);
+            int rand = Random.Range(0, clips.Length);
             audioSource.clip = clips[rand];
             audioSource.volume = clipVolume[rand];
             audioSource.Play();
