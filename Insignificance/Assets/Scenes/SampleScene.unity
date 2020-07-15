@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 1.59
+  m_AmbientIntensity: 0
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 4067de1a02072244798361060c5e7325, type: 2}
@@ -35,10 +35,10 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_ReflectionIntensity: 0.68
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.54439956, g: 0.5070023, b: 0.5242686, a: 1}
+  m_IndirectSpecularColor: {r: 0.4554209, g: 0.42357516, b: 0.43827835, a: 0.68}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -161,6 +161,7 @@ GameObject:
   m_Component:
   - component: {fileID: 196403605}
   - component: {fileID: 196403604}
+  - component: {fileID: 196403606}
   m_Layer: 0
   m_Name: Contrast light
   m_TagString: Untagged
@@ -180,7 +181,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 0.8490566, g: 0.8490566, b: 0.8490566, a: 1}
-  m_Intensity: 0.5
+  m_Intensity: 3
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -243,6 +244,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 37.318, y: 120, z: -34.705}
+--- !u!114 &196403606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 196403603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 619f88a03bb48a243875b9971bae48fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 10
+  color0: {r: 0.8679245, g: 0.84437656, b: 0.749199, a: 1}
+  color1: {r: 0.28751335, g: 0.28751335, b: 0.6698113, a: 1}
+  lt: {fileID: 0}
 --- !u!1 &250627061
 GameObject:
   m_ObjectHideFlags: 0
@@ -982,7 +999,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 0.9056604, g: 0.8888526, b: 0.8415806, a: 1}
-  m_Intensity: 0.6
+  m_Intensity: 0.3
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -2015,7 +2032,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bce5d73661422234999aa22935a4de48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSize: 90
+  mapSize: 60
   noiseMapScale: 16
   fallOffMapPower: 7
   waterRate: 0.25
