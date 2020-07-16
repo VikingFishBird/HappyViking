@@ -256,7 +256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 619f88a03bb48a243875b9971bae48fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  duration: 10
+  duration: 100
   color0: {r: 0.8679245, g: 0.84437656, b: 0.749199, a: 1}
   color1: {r: 0.28751335, g: 0.28751335, b: 0.6698113, a: 1}
   lt: {fileID: 0}
