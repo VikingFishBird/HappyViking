@@ -6,6 +6,8 @@ public class CameraController : MonoBehaviour
 {
     public Transform cameraTransform;
     public Transform followTransform;
+    
+    private Camera cam;
 
     public float fastSpeed;
     public float normalSpeed;
@@ -14,6 +16,7 @@ public class CameraController : MonoBehaviour
     public float movementTime;
     public float rotationAmount;
 
+    [Space]
     public float maxZ, minZ, maxY, minY;
 
     public Vector3 zoomAmount;
@@ -33,6 +36,7 @@ public class CameraController : MonoBehaviour
         newPosition = transform.position;
         newRotation = transform.rotation;
         newZoom = cameraTransform.localPosition;
+        cameraTransform.LookAt(transform);
     }
 
     // Update is called once per frame
@@ -133,9 +137,20 @@ public class CameraController : MonoBehaviour
 
         newZoom.y = Mathf.Clamp(newZoom.y, minY, maxY);
         newZoom.z = Mathf.Clamp(newZoom.z, minZ, maxZ);
-
+    
+        /*
+        // Find point where camera is looking
+        Plane plane = new Plane(Vector3.up, Vector3.zero);
+        float entry;
+        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        Vector3 point = new Vector3(0,0,0);
+        if(plane.Raycast(ray, out entry)) {
+            point = ray.GetPoint(entry);
+            transform.position = point;
+            //transform.RotateAround(point, Vector3.up, rotationAmount * Time.captureDeltaTime);
+        }*/
         transform.position = Vector3.Lerp(transform.position, newPosition, Time.deltaTime * movementTime);
         transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, Time.deltaTime * movementTime);
-        cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, newZoom, Time.deltaTime * movementTime);
+        cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, newZoom, 20*Time.deltaTime * movementTime);
     }
 }
