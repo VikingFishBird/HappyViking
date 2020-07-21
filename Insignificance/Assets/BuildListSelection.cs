@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Runtime.InteropServices;
 
 public class BuildListSelection : MonoBehaviour
 {
@@ -14,13 +15,17 @@ public class BuildListSelection : MonoBehaviour
     public Sprite[] buildingImages;
     public GameObject buildingPreview;
     public GameObject req1Preview;
+    public GameObject req2Preview;
     Image imageComponent;
-
+    //desc
     public TextMeshProUGUI description;
     String[] buildingDescriptions;
-
+    //req1
     Image req1Component;
     public Sprite[] req1Images;
+    //req2
+    Image req2Component;
+    public Sprite[] req2Images;
 
     public void setSelectionIndex(int index){
         if(selectionIndex != -1)
@@ -34,8 +39,15 @@ public class BuildListSelection : MonoBehaviour
         imageComponent.sprite = buildingImages[selectionIndex];
         //desc
         description.text = buildingDescriptions[selectionIndex];
-
+        //req1
         req1Component.sprite = req1Images[selectionIndex];
+        //req2
+        req2Component.sprite = req2Images[selectionIndex];
+        if (req2Component.sprite == null)
+            req2Component.gameObject.SetActive(false);
+        else
+            req2Component.gameObject.SetActive(true);
+
     }
 
     public void resetHud()
@@ -56,13 +68,19 @@ public class BuildListSelection : MonoBehaviour
             buildings.Add(child.gameObject);
         }
         selectionIndex = -1;
+        //image
         imageComponent = buildingPreview.GetComponent<Image>();
+        //req1
         req1Component = req1Preview.GetComponent<Image>();
-
+        //req2
+        req2Component = req2Preview.GetComponent<Image>();
+        //desc
         buildingDescriptions = new string[]{
         "100 log\n100 Stone",
         "200 log\n200 Stone\n300 Iron"
+
         };
+        
     }
 
     // Update is called once per frame
