@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 public class BuildListSelection : MonoBehaviour
 {
-    int selectionIndex;
+    public int selectionIndex;
     List<GameObject> buildings;
     public GameObject backdrop;
     public Sprite[] buildingImages;
@@ -26,6 +26,12 @@ public class BuildListSelection : MonoBehaviour
     //req2
     Image req2Component;
     public Sprite[] req2Images;
+    //req1Desc
+    public TextMeshProUGUI req1description;
+    String[] req1Descriptions;
+    //req2Desc
+    public TextMeshProUGUI req2description;
+    String[] req2Descriptions;
 
     public void setSelectionIndex(int index){
         if(selectionIndex != -1)
@@ -43,12 +49,18 @@ public class BuildListSelection : MonoBehaviour
         req1Component.sprite = req1Images[selectionIndex];
         //req2
         req2Component.sprite = req2Images[selectionIndex];
+        //req1Desc
+        req1description.text = req1Descriptions[selectionIndex];
+        //req2Desc
+        req2description.text = req2Descriptions[selectionIndex];
+
         if (req2Component.sprite == null)
             req2Component.gameObject.SetActive(false);
         else
             req2Component.gameObject.SetActive(true);
 
     }
+
 
     public void resetHud()
     {
@@ -76,11 +88,75 @@ public class BuildListSelection : MonoBehaviour
         req2Component = req2Preview.GetComponent<Image>();
         //desc
         buildingDescriptions = new string[]{
-        "100 log\n100 Stone",
-        "200 log\n200 Stone\n300 Iron"
-
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n",
+            "Desc\n"
         };
-        
+        req1Descriptions = new string[]{
+            "Architecture 1",
+            "Architecture 2",
+            "Architecture 3",
+            "Architecture 1",
+            "Architecture 1",
+            "Architecture 1",
+            "Architecture 2",
+            "Architecture 2",
+            "Architecture 3",
+            "Architecture 2",
+            "Architecture 1",
+            "Architecture 1",
+            "Architecture 1",
+            "Architecture 2",
+            "Architecture 2",
+            "Architecture 3",
+            "Architecture 2",
+            "Architecture 2",
+            "Architecture 1",
+            "Architecture 3",
+            "Architecture 3"
+        };
+        req2Descriptions = new string[]{
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            "Agriculture 1",
+            "Animal Care 1",
+            "Animal Care 1",
+            " ",
+            " ",
+            " ",
+            " ",
+            "Medicine",
+            "Religion",
+            " "
+        };
+
     }
 
     // Update is called once per frame

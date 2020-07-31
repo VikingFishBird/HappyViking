@@ -127,13 +127,6 @@ public class CameraController : MonoBehaviour
             newRotation *= Quaternion.Euler(Vector3.up * -rotationAmount);
         }
 
-        if (Input.GetKey(KeyCode.R)) {
-            newZoom += zoomAmount;
-        }
-        if (Input.GetKey(KeyCode.F)) {
-            newZoom -= zoomAmount;
-        }
-
         newZoom.y = Mathf.Clamp(newZoom.y, minY, maxY);
         newZoom.z = Mathf.Clamp(newZoom.z, minZ, maxZ);
     
