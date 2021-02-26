@@ -9376,6 +9376,17 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1829877218}
+        m_MethodName: UpdateTechTreeColors
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1369796456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13217,6 +13228,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1829877217}
+  - component: {fileID: 1829877218}
   m_Layer: 0
   m_Name: TechTree
   m_TagString: Untagged
@@ -13248,6 +13260,222 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1829877218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1829877216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40f6d69912d0c274f98a05e8d1195110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  items:
+  - name: Agriculture
+    description: 
+    gameObject: {fileID: 1161358058}
+    branch: 0
+    status: 2
+    childLines: []
+  - name: Crop Farming 1
+    description: 
+    gameObject: {fileID: 1584718631}
+    branch: 0
+    status: 3
+    childLines:
+    - {fileID: 1586906982}
+    - {fileID: 1108106709}
+    - {fileID: 1591855216}
+  - name: Crop Farming 2
+    description: 
+    gameObject: {fileID: 1119659007}
+    branch: 0
+    status: 3
+    childLines:
+    - {fileID: 210035505}
+  - name: Animal Husbandry 1
+    description: 
+    gameObject: {fileID: 2006409786}
+    branch: 0
+    status: 3
+    childLines:
+    - {fileID: 1586906982}
+    - {fileID: 1097481156}
+    - {fileID: 1934509587}
+  - name: Animal Husbandry 2
+    description: 
+    gameObject: {fileID: 1492959406}
+    branch: 0
+    status: 3
+    childLines:
+    - {fileID: 1553520380}
+  - name: Math
+    description: 
+    gameObject: {fileID: 1148522188}
+    branch: 1
+    status: 2
+    childLines: []
+  - name: Architecture 1
+    description: 
+    gameObject: {fileID: 11361602}
+    branch: 1
+    status: 3
+    childLines:
+    - {fileID: 408603153}
+    - {fileID: 1523495917}
+    - {fileID: 1064312412}
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  - name: 
+    description: 
+    gameObject: {fileID: 0}
+    branch: 0
+    status: 0
+    childLines: []
+  activeResearchButton: {fileID: 21300000, guid: 1a5f748e51784c145a814fc8548aa9be,
+    type: 3}
+  idleButton: {fileID: 21300000, guid: 0b8dfe78d9056a9459f28f5945b47d0c, type: 3}
+  lockedButton: {fileID: 21300000, guid: b0410fccb28eb4c4190f052fe4afd437, type: 3}
+  lockedLine: {fileID: 21300000, guid: 6687cdd3afc890349b92dd6341663933, type: 3}
+  dimLine: {fileID: 21300000, guid: 49635dcc4aaf71543b2f44cb908e4e20, type: 3}
+  brightLine: {fileID: 21300000, guid: d6e6f95cbccac5a4aa59fc5628f25182, type: 3}
+  tempSprite: {fileID: 21300000, guid: e70c7434d981d2549aec6e5f865053a1, type: 3}
+  AgricultureButton: {fileID: 21300000, guid: 39d279f250d8f1243b1e154697df2757, type: 3}
+  MathButton: {fileID: 21300000, guid: 584d5b259a959dd4281b0df90cc1bd34, type: 3}
+  LumberButton: {fileID: 21300000, guid: 82ebdbd71175a364ca0624b086cdb4a7, type: 3}
+  MilitaryButton: {fileID: 21300000, guid: cfee77cb6b29b3d4d8d85e086af7f37f, type: 3}
+  CultureButton: {fileID: 21300000, guid: a7d7d3d19e981fa4ab50cd39c14847c2, type: 3}
+  AgricultureLine: {fileID: 21300000, guid: 3f68a1e68360a32469eea1469e3bb1e8, type: 3}
+  MathLine: {fileID: 21300000, guid: 3b3291669e96a5d4baabdae915704c00, type: 3}
+  LumberLine: {fileID: 21300000, guid: 2bb7550de06cb6547b5149aed6f6d7fa, type: 3}
+  MilitaryLine: {fileID: 21300000, guid: aa470e3c4acebe349b6a43c41ec15841, type: 3}
+  CultureLine: {fileID: 21300000, guid: 6f4724ba4381bcc458d1fdb61d3f84f3, type: 3}
 --- !u!1 &1843569546
 GameObject:
   m_ObjectHideFlags: 0
