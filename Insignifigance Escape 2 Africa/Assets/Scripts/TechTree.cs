@@ -43,7 +43,7 @@ public class TechTree : MonoBehaviour
         }
 
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < items.Length; i++) {
             if (items[i].gameObject == null)
                 continue;
 
