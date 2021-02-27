@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MapGenerator : MonoBehaviour {
 
-    public enum DrawMode { NoiseMap, ColorMap };
+    public enum DrawMode { NoiseMap, ColorMap, Mesh };
 
     public DrawMode drawMode;
 
@@ -19,14 +19,20 @@ public class MapGenerator : MonoBehaviour {
     public int seed;
     public Vector2 offset;
 
+    public float meshHeightMultiplier;
+
     public bool autoUpdate;
 
     public TerrainType[] regions;
 
     public void GenerateMap() {
         float[,] heightNoiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
-        // float[,] treeNoiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
-        // float[,] snowNoiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
+        /*
+        float[,] treeNoiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
+        float[,] snowNoiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
+  
+
+        */
 
         Color[] colorMap = new Color[mapWidth * mapHeight];
 
@@ -47,6 +53,9 @@ public class MapGenerator : MonoBehaviour {
         }
         else if (drawMode == DrawMode.ColorMap) {
             display.DrawTexture(TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
+        }
+        else if (drawMode == DrawMode.Mesh) {
+            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(heightNoiseMap, meshHeightMultiplier), TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
         }
         
     }
