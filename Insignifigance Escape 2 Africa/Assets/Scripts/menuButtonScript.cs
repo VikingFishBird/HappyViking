@@ -8,7 +8,7 @@ public class menuButtonScript : MonoBehaviour
 
     public void activateMenuHud()
     {
-        if (menuHud.active)
+        if (menuHud.activeSelf)
         {
             menuHud.SetActive(false);
         }
@@ -23,7 +23,7 @@ public class menuButtonScript : MonoBehaviour
     void Update()
     {
         if (Input.GetKey(KeyCode.Escape))
-            if (menuHud.active)
+            if (menuHud.activeSelf)
             {
                 menuHud.SetActive(false);
             }

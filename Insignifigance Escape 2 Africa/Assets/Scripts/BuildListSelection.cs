@@ -26,7 +26,7 @@ public class BuildListSelection : MonoBehaviour
         selectionIndex = index;
         buildings[selectionIndex].transform.GetChild(0).gameObject.SetActive(true);
 
-        if (!backdrop.active)
+        if (!backdrop.activeSelf)
             backdrop.SetActive(true);
         //desc
         description.text = buildingDescriptions[selectionIndex];
