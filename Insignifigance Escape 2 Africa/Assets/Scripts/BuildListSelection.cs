@@ -21,8 +21,8 @@ public class BuildListSelection : MonoBehaviour
 
     public void setSelectionIndex(int index)
     {
-        if (selectionIndex != -1)
-            buildings[selectionIndex].transform.GetChild(0).gameObject.SetActive(false);
+        //if (selectionIndex != -1)
+           // buildings[selectionIndex].transform.GetChild(0).gameObject.SetActive(false);
         selectionIndex = index;
         buildings[selectionIndex].transform.GetChild(0).gameObject.SetActive(true);
 
@@ -33,14 +33,7 @@ public class BuildListSelection : MonoBehaviour
     }
 
 
-    public void resetHud()
-    {
-        if (selectionIndex != -1)
-        {
-            buildings[selectionIndex].transform.GetChild(0).gameObject.SetActive(false);
-            backdrop.SetActive(false);
-        }
-    }
+    
 
     void Start()
     {
