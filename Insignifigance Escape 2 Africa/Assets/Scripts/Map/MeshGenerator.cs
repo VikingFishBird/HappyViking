@@ -47,6 +47,8 @@ public class MeshData {
         vertices = new Vector3[meshWidth * meshHeight];
         triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
         uvs = new Vector2[meshWidth * meshHeight];
+
+        triangleIndex = 0;
     }
 
     public void AddTriangle(int a, int b, int c) {

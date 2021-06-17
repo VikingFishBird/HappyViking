@@ -3,10 +3,12 @@ using System.Collections;
 
 public static class Noise {
 
-    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, int seed, float scale, int octaves, float persistance, float lacunarity, Vector2 offset) {
+    public static float[,] GenerateNoiseMap(bool randomSeed, int mapWidth, int mapHeight, int seed, float scale, int octaves, float persistance, float lacunarity, Vector2 offset) {
         float[,] noiseMap = new float[mapWidth, mapHeight];
-
         System.Random prng = new System.Random(seed);
+        if (randomSeed) {
+            prng = new System.Random((int) (Random.Range(-100000, 100000)));
+        }
         Vector2[] octaveOffsets = new Vector2[octaves];
         for (int i = 0; i < octaves; i++) {
             float offsetX = prng.Next(-100000, 100000) + offset.x;

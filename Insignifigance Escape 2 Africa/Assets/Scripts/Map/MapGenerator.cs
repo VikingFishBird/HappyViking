@@ -6,11 +6,17 @@ using System.Collections.Generic;
 
 public class MapGenerator : MonoBehaviour {
 
-    public enum DrawMode { NoiseMap, ColorMap, Mesh };
-
-    public DrawMode drawMode;
-
+    public const float waterLevel = 0.3f;
     public const int mapChunkSize = 241;
+
+    // Map Texture Colors
+    public static Color waterColor = new Color(115, 167, 178);
+
+    public static Color lightGrassColor = new Color(91, 201, 120);
+    public static Color darkGrassColor = new Color(59, 84, 66);
+
+    MapDisplay display;
+
     public int mapSize;  // Amount of chunks per row/col
     [Range(0, 6)]
     public int editorPreviewLOD;
@@ -24,98 +30,84 @@ public class MapGenerator : MonoBehaviour {
     public int seed;
     public Vector2 offset;
 
-    public float meshHeightMultiplier;
-    public AnimationCurve meshHeightCurve;
+    void Start() {
 
-    public bool autoUpdate;
-    
-    public TerrainType[] regions;
-
-    Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
-    Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
-
-    public void RequestMapData(Action<MapData> callback) {
-        ThreadStart threadStart = delegate {
-            MapDataThread(callback);
-        };
-
-        new Thread(threadStart).Start();
-    }
-
-    void MapDataThread(Action<MapData> callback) {
-        MapData mapData = GenerateMapData();
-        lock (mapDataThreadInfoQueue) {
-            mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback, mapData));
-        }
-    }
-
-    public void RequestMeshData(MapData mapData, int lod, Action<MeshData> callback) {
-        ThreadStart threadStart = delegate {
-            MeshDataThread(mapData, lod, callback);
-        };
-
-        new Thread(threadStart).Start();
-    }
-
-    void MeshDataThread(MapData mapData, int lod, Action<MeshData> callback) {
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, lod);
-        lock (meshDataThreadInfoQueue) {
-            meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
-        }
-    }
-
-    public void DrawMapInEditor() {
-        MapData mapData = GenerateMapData();
-
-        MapDisplay display = FindObjectOfType<MapDisplay>();
-        if (drawMode == DrawMode.NoiseMap) {
-            display.DrawTexture(TextureGenerator.TextureFromHeightMap(mapData.heightMap));
-        }
-        else if (drawMode == DrawMode.ColorMap) {
-            display.DrawTexture(TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
-        }
-        else if (drawMode == DrawMode.Mesh) {
-            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD), TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
-        }
     }
 
     void Update() {
-        if (mapDataThreadInfoQueue.Count > 0) {
-            for (int i = 0; i < mapDataThreadInfoQueue.Count; i++) {
-                MapThreadInfo<MapData> threadInfo = mapDataThreadInfoQueue.Dequeue();
-                threadInfo.callback(threadInfo.parameter);
-            }
-        }
-        if (meshDataThreadInfoQueue.Count > 0) {
-            for (int i = 0; i < meshDataThreadInfoQueue.Count; i++) {
-                MapThreadInfo<MeshData> threadInfo = meshDataThreadInfoQueue.Dequeue();
-                threadInfo.callback(threadInfo.parameter);
-            }
-        }
+
     }
 
-    MapData GenerateMapData() {
-        float[,] heightNoiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
-        /*
-        float[,] treeNoiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
-        float[,] snowNoiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
-        */
+    public void GenerateMap() {
+        display = FindObjectOfType<MapDisplay>();
+        int fullMapSize = mapSize * (mapChunkSize - 1) + 1;
 
-        Color[] colorMap = new Color[mapChunkSize * mapChunkSize];
+        // Create Mesh, Create Texture
+        // 1) Get "height map"
+        float[,] heightNoiseMap = Noise.GenerateNoiseMap(fullMapSize, fullMapSize,
+            seed, noiseScale, octaves, persistance, lacunarity, offset);
+        float[,] grassNoiseMap = Noise.GenerateNoiseMap(fullMapSize, fullMapSize,
+            seed, noiseScale, octaves, persistance, lacunarity, offset);
+        Color[] colorMap = new Color[fullMapSize * fullMapSize];
 
-        for(int y = 0; y < mapChunkSize; y++) {
-            for(int x = 0; x < mapChunkSize; x++) {
-                float currentHeight = heightNoiseMap[x, y];
-                for(int i = 0; i < regions.Length; i++) {
-                    if (currentHeight <= regions[i].height) {
-                        colorMap[y * mapChunkSize + x] = regions[i].color;
-                        break;
-                    }
+        for (int y = 0; y < fullMapSize; y++) {
+            for (int x = 0; x < fullMapSize; x++) {
+                if (heightNoiseMap[x, y] < waterLevel) {
+                    // OCEAN
+                    colorMap[y * fullMapSize + x] = waterColor;
+                } else {
+                    // GRASS
+                    int r = Mathf.RoundToInt((lightGrassColor.r - darkGrassColor.r) * grassNoiseMap[x, y] + darkGrassColor.r);
+                    int g = Mathf.RoundToInt((lightGrassColor.g - darkGrassColor.g) * grassNoiseMap[x, y] + darkGrassColor.g);
+                    int b = Mathf.RoundToInt((lightGrassColor.b - darkGrassColor.b) * grassNoiseMap[x, y] + darkGrassColor.b);
+
+                    colorMap[y * fullMapSize + x] = new Color(r, g, b);
                 }
             }
         }
 
-        return new MapData(heightNoiseMap, colorMap);
+        //Texture2D texture = TextureGenerator.TextureFromColorMap(colorMap);
+
+        display.DrawTexture(TextureGenerator.TextureFromColorMap(colorMap, fullMapSize, fullMapSize));
+
+        // 2) Set ocean, coasts, land
+        // 3) Add Rivers using [banished method](https://www.reddit.com/r/proceduralgeneration/comments/fnglab/how_to_procedurally_generate_rivers_and_small/)
+        // 4) Set plains and forest biomes
+        // 5) Generate trees/ rocks / etc
+    }
+
+    Mesh GenerateQuad() {
+        Mesh mapMesh = new Mesh();
+
+        Vector3[] vertices = new Vector3[4] {
+            new Vector3(-mapSize, 0, -mapSize),
+            new Vector3(-mapSize, 0, mapSize),
+            new Vector3(mapSize, 0, -mapSize),
+            new Vector3(mapSize, 0, mapSize)
+        };
+
+        mapMesh.vertices = vertices;
+
+        int[] tris = new int[6]
+        {
+            // lower left triangle
+            0, 1, 2,
+            // upper right triangle
+            1, 3, 2
+        };
+        mapMesh.triangles = tris;
+
+        
+        Vector2[] uv = new Vector2[4]
+        {
+            new Vector2(0, 0),
+            new Vector2(1, 0),
+            new Vector2(0, 1),
+            new Vector2(1, 1)
+        };
+        mapMesh.uv = uv;
+
+        return mapMesh;
     }
 
     void OnValidate() {
@@ -125,32 +117,5 @@ public class MapGenerator : MonoBehaviour {
         if (octaves < 0) {
             octaves = 0;
         }
-    }
-
-    struct MapThreadInfo<T> {
-        public readonly Action<T> callback;
-        public readonly T parameter;
-
-        public MapThreadInfo(Action<T> callback, T parameter) {
-            this.callback = callback;
-            this.parameter = parameter;
-        }
-    }
-}
-
-[System.Serializable]
-public struct TerrainType {
-    public string name;
-    public float height;
-    public Color color;
-}
-
-public struct MapData {
-    public readonly float[,] heightMap;
-    public readonly Color[] colorMap;
-
-    public MapData(float[,] heightMap, Color[] colorMap) {
-        this.heightMap = heightMap;
-        this.colorMap = colorMap;
     }
 }
