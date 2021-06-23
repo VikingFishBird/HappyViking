@@ -211,7 +211,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &714177789
 GameObject:
@@ -277,7 +277,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &733368353
 GameObject:
@@ -324,6 +324,14 @@ MonoBehaviour:
     persistance: 0.09
     lacunarity: 2
     offset: {x: 0, y: 0}
+  treePrefabs:
+  - {fileID: 4616597898652154497, guid: 7054edd134dae864395566472d980128, type: 3}
+  - {fileID: 5436299615638844646, guid: 377cabbd95b09274f95f4afe4f7b1532, type: 3}
+  - {fileID: 4507994404869729867, guid: 256158c880b5ec3429ae427ad406aa2e, type: 3}
+  - {fileID: 3917935839130277990, guid: 755ad6512d14b7a41a4cc9258f26bb08, type: 3}
+  - {fileID: 8615502571695718986, guid: 6e4f88ad3400e6e4383827cb8f467bae, type: 3}
+  - {fileID: 4961405421798454683, guid: 8d23218a334d5104e84217595c9a791a, type: 3}
+  rockPrefabs: []
   water: {fileID: 2100000, guid: 64c58e0170291c149bfe365dc60e8113, type: 2}
   grass: {fileID: 2100000, guid: 715899972787cac4dbd0211c049af8ab, type: 2}
   mud: {fileID: 2100000, guid: 039bf95f94162b04982890d0729e9849, type: 2}
@@ -340,7 +348,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &898588133
 GameObject:
@@ -521,7 +529,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 40000
+  far clip plane: 1000
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -547,13 +555,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1075396193}
-  m_LocalRotation: {x: 0.69792074, y: 0.004296107, z: -0.0041860067, w: 0.71615}
-  m_LocalPosition: {x: 870.0067, y: 1306.7904, z: 802.33716}
+  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: 0, y: 50, z: -50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1776141467}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
 --- !u!1 &1111980491
 GameObject:
   m_ObjectHideFlags: 0
@@ -723,13 +731,63 @@ RectTransform:
   m_Children:
   - {fileID: 898588134}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1776141466
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1776141467}
+  - component: {fileID: 1776141468}
+  m_Layer: 0
+  m_Name: CameraRig
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1776141467
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776141466}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 120, y: 0, z: 60}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1075396196}
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1776141468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776141466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00b5a96aeeb532241bf7efde2b91dcdd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraTransform: {fileID: 1075396196}
+  normalSpeed: 0.3
+  fastSpeed: 1
+  movementTime: 5
+  rotationAmount: 0.5
+  zoomAmount: {x: 0, y: -3, z: 3}
 --- !u!1 &1931782815
 GameObject:
   m_ObjectHideFlags: 0
@@ -822,5 +880,5 @@ Transform:
   m_LocalScale: {x: 100, y: 1, z: 100}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
