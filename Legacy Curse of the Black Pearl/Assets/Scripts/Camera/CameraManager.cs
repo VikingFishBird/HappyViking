@@ -2,8 +2,15 @@
 
 public class CameraManager : MonoBehaviour
 {
+    int MIN_ZOOM;
+    int MAX_ZOOM;
+
+    int MIN_POS;
+    int MAX_POS;
+
     public Transform followTransform;
     public Transform cameraTransform;
+    public Camera mainCamera;
 
     public float normalSpeed;
     public float fastSpeed;
@@ -11,9 +18,9 @@ public class CameraManager : MonoBehaviour
     public float rotationAmount;
     public Vector3 zoomAmount;
 
-    Vector3 newPosition;
-    Quaternion newRotation;
-    Vector3 newZoom;
+    public Vector3 newPosition;
+    public Quaternion newRotation;
+    public Vector3 newZoom;
     float movementSpeed;
 
     Vector3 dragStartPosition;
@@ -24,6 +31,7 @@ public class CameraManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        SetBounds(6012);
         newPosition = transform.position;
         newRotation = transform.rotation;
         newZoom = cameraTransform.localPosition;
@@ -43,15 +51,30 @@ public class CameraManager : MonoBehaviour
         }
     }
 
+    void SetBounds(int mapSize) {
+        MIN_ZOOM = 8;
+        MAX_ZOOM = ((mapSize / 10) / 4);
+
+        MIN_POS = 50;
+        MAX_POS = (mapSize / 10) - 50;
+
+
+    }
+
     void HandleMouseInput() {
         if (Input.mouseScrollDelta.y != 0) {
-            newZoom += Input.mouseScrollDelta.y * zoomAmount;
+            if (Input.mouseScrollDelta.y > 0 && newZoom.y > MIN_ZOOM) {
+                newZoom += Input.mouseScrollDelta.y * zoomAmount;
+            }
+            if (Input.mouseScrollDelta.y < 0 && newZoom.y < MAX_ZOOM) {
+                newZoom += Input.mouseScrollDelta.y * zoomAmount;
+            }
         }
 
         if (Input.GetMouseButtonDown(0)) {
             Plane plane = new Plane(Vector3.up, Vector3.zero);
 
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             float entry;
 
             if(plane.Raycast(ray, out entry)) {
@@ -93,16 +116,20 @@ public class CameraManager : MonoBehaviour
 
         // Move camera based on WASD / arrow keys
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) {
-            newPosition += (transform.forward * movementSpeed);
+            if (newPosition.z < MAX_POS)
+                newPosition += (transform.forward * movementSpeed);
         }
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) {
-            newPosition += (transform.forward * - movementSpeed);
+            if (newPosition.z > MIN_POS)
+                newPosition += (transform.forward * - movementSpeed);
         }
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) {
-            newPosition += (transform.right * - movementSpeed);
+            if (newPosition.x > MIN_POS)
+                newPosition += (transform.right * - movementSpeed);
         }
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
-            newPosition += (transform.right * movementSpeed);
+            if (newPosition.x < MAX_POS)
+                newPosition += (transform.right * movementSpeed);
         }
 
         if (Input.GetKey(KeyCode.Q)) {
@@ -113,10 +140,12 @@ public class CameraManager : MonoBehaviour
         }
 
         if (Input.GetKey(KeyCode.R)) {
-            newZoom += zoomAmount;
+            if (newZoom.y > MIN_ZOOM)
+                newZoom += zoomAmount / 4;
         }
         if (Input.GetKey(KeyCode.F)) {
-            newZoom -= zoomAmount;
+            if (newZoom.y < MAX_ZOOM)
+                newZoom -= zoomAmount / 4;
         }
 
         transform.position = Vector3.Lerp(transform.position, newPosition, Time.deltaTime * movementTime);

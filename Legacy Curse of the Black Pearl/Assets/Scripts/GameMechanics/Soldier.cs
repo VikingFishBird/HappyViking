@@ -3,7 +3,8 @@
 public class Soldier : MonoBehaviour
 {
 
-    public string name;
+    public string firstName;
+    public string lastfirstName;
     public int health;
     public int kills;
     public Vector2 location;

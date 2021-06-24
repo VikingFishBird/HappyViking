@@ -7,9 +7,9 @@ using csDelaunay;
 public class MapGenerator : MonoBehaviour {
 
     // Map Creation Variables
-    public int POLY_COUNT; //200
-    public int MAP_SIZE;
-    public int LLOYD_ITER;
+    const int POLY_COUNT = 3200;
+    const int MAP_SIZE = 6012;
+    const int LLOYD_ITER = 5;
 
     // Noise Map Values
     public NoiseMapInfo[] noiseMapInfo;
@@ -258,6 +258,11 @@ public class MapGenerator : MonoBehaviour {
                 y0 += sy;
             }
         }
+    }
+
+    // Returns map size
+    private static int GetMapSize() {
+        return MAP_SIZE;
     }
 }
 
