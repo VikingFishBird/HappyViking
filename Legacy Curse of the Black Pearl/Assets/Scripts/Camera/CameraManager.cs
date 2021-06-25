@@ -139,7 +139,7 @@ public class CameraManager : MonoBehaviour
             newRotation *= Quaternion.Euler(Vector3.up * -rotationAmount);
         }
 
-        if (Input.GetKey(KeyCode.R)) {
+        /*if (Input.GetKey(KeyCode.R)) {
             if (newZoom.y > MIN_ZOOM)
                 newZoom += zoomAmount / 4;
         }
@@ -147,7 +147,7 @@ public class CameraManager : MonoBehaviour
             if (newZoom.y < MAX_ZOOM)
                 newZoom -= zoomAmount / 4;
         }
-
+        */
         transform.position = Vector3.Lerp(transform.position, newPosition, Time.deltaTime * movementTime);
         transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, Time.deltaTime * movementTime);
         cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, newZoom, Time.deltaTime * movementTime);
