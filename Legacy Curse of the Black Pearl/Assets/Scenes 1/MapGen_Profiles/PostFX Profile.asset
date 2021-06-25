@@ -12,25 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48a79b01ea5641d4aa6daa2e23605641, type: 3}
   m_Name: Bloom
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
   intensity:
     overrideState: 1
-    value: 18.14
+    value: 0.7
   threshold:
     overrideState: 1
-    value: 1.68
+    value: 0.1
   softKnee:
     overrideState: 1
-    value: 0.873
+    value: 0.666
   clamp:
     overrideState: 0
     value: 65472
   diffusion:
     overrideState: 1
-    value: 6.01
+    value: 3.98
   anamorphicRatio:
     overrideState: 0
     value: 0
@@ -127,12 +127,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40b924e2dad56384a8df2a1e111bb675, type: 3}
   m_Name: Vignette
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
   mode:
-    overrideState: 0
+    overrideState: 1
     value: 0
   color:
     overrideState: 1
@@ -142,7 +142,7 @@ MonoBehaviour:
     value: {x: 0.5, y: 0.5}
   intensity:
     overrideState: 1
-    value: 0.376
+    value: 0.217
   smoothness:
     overrideState: 0
     value: 0.2
@@ -199,7 +199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1cb7e9e120078f43bce4f0b1be547a7, type: 3}
   m_Name: AmbientOcclusion
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adb84e30e02715445aeb9959894e3b4d, type: 3}
   m_Name: ColorGrading
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
@@ -301,7 +301,7 @@ MonoBehaviour:
     value: -23
   saturation:
     overrideState: 1
-    value: 3
+    value: 0
   brightness:
     overrideState: 0
     value: 0
@@ -309,8 +309,8 @@ MonoBehaviour:
     overrideState: 0
     value: 0.07
   contrast:
-    overrideState: 0
-    value: 5
+    overrideState: 1
+    value: -6
   mixerRedOutRedIn:
     overrideState: 0
     value: 100
@@ -339,14 +339,14 @@ MonoBehaviour:
     overrideState: 0
     value: 100
   lift:
-    overrideState: 0
-    value: {x: 0.9952153, y: 0.9904306, z: 1, w: 0}
+    overrideState: 1
+    value: {x: 1, y: 1, z: 1, w: 0}
   gamma:
-    overrideState: 0
-    value: {x: 1, y: 0.9454461, z: 0.9798832, w: 0.04494382}
+    overrideState: 1
+    value: {x: 1, y: 1, z: 1, w: -0.06355932}
   gain:
-    overrideState: 0
-    value: {x: 0.95800894, y: 0.842179, z: 1, w: 0.08988764}
+    overrideState: 1
+    value: {x: 1, y: 1, z: 1, w: -0.06355931}
   masterCurve:
     overrideState: 0
     value:
