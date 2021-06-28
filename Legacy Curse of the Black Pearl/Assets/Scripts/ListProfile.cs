@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 
 public class ListProfile : MonoBehaviour
@@ -22,7 +21,7 @@ public class ListProfile : MonoBehaviour
     public void addItem()
     {
         GameObject button = Instantiate(listButton);
-        button.transform.parent = transform;
+        button.transform.SetParent(transform);
         button.transform.localScale = new Vector3(1, 1, 1);
     }
 
