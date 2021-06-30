@@ -27,6 +27,8 @@ public class MapGenerator : MonoBehaviour {
     const float MIN_SCALE = 3.5f;
     const float MAX_SCALE = 4.5f;
 
+    const float MIN_TREE_RADIUS = 0.5f;
+
     public GameObject[] treePrefabs;
     public GameObject[] rockPrefabs;
 
@@ -43,6 +45,16 @@ public class MapGenerator : MonoBehaviour {
     private List<Edge> edges;
 
     private List<CellInfo> cells;
+    MapChunk[] mapObjects;
+    float[,] falloffMap;
+    float[,] heightMap;
+    float[,] treeMap;
+    int noiseMapSize;
+    const int WATER_CHUNK = 0;
+    const int PLAINS_CHUNK = 1;
+    const int FOREST_EDGE_CHUNK = 2;
+    const int LIGHT_FOREST_CHUNK = 3;
+    const int HEAVY_FOREST_CHUNK = 4;
 
     // Generates the Entire Map
     public void GenerateMap() {
@@ -50,6 +62,7 @@ public class MapGenerator : MonoBehaviour {
         // object as parent for meshes.
         ClearMap();
         CellInfo.parent = transform;
+        MapChunk.parent = transform;
 
         // Voronoi nodes
         List<Vector2f> nodes = GenerateNodes();
@@ -68,10 +81,22 @@ public class MapGenerator : MonoBehaviour {
 
         DisplayVoronoiDiagram();
 
+
         // Create Meshes
+        mapObjects = new MapChunk[] {
+            new MapChunk("Water"), new MapChunk("Plains"),
+            new MapChunk("Sparse Trees"), new MapChunk("Light Forest"),
+            new MapChunk("Heavy Forest")
+        };
+
+        GenPerlinMaps();
+
         SetCellList(bounds);
 
-        SetTileBiomes();
+        // Merge Meshes
+        MergeMeshes();
+
+        // Place Objects
 
     }
 
@@ -85,12 +110,45 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+    private void GenPerlinMaps() {
+        noiseMapSize = MAP_SIZE / RELATIVE_NOISE_SIZE;
+
+        falloffMap = FalloffGenerator.GenerateFalloffMap(noiseMapSize);
+
+        heightMap = Noise.GenerateNoiseMap(RANDOM_SEED, noiseMapSize, noiseMapSize, 0,
+            noiseMapInfo[HEIGHT_MAP].scale, noiseMapInfo[HEIGHT_MAP].octaves,
+            noiseMapInfo[HEIGHT_MAP].persistance, noiseMapInfo[HEIGHT_MAP].lacunarity,
+            noiseMapInfo[HEIGHT_MAP].offset);
+        treeMap = Noise.GenerateNoiseMap(RANDOM_SEED, noiseMapSize, noiseMapSize, 0,
+            noiseMapInfo[TREE_MAP].scale, noiseMapInfo[TREE_MAP].octaves,
+            noiseMapInfo[TREE_MAP].persistance, noiseMapInfo[TREE_MAP].lacunarity,
+            noiseMapInfo[TREE_MAP].offset);
+    }
+
+    private void MergeMeshes() {
+        foreach (MapChunk chunk in mapObjects) {
+            chunk.CreateMesh();
+        }
+        mapObjects[WATER_CHUNK].meshRenderer.sharedMaterial = water;
+        mapObjects[PLAINS_CHUNK].meshRenderer.sharedMaterial = grass;
+        mapObjects[FOREST_EDGE_CHUNK].meshRenderer.sharedMaterial = grass;
+        mapObjects[LIGHT_FOREST_CHUNK].meshRenderer.sharedMaterial = grass;
+        mapObjects[HEAVY_FOREST_CHUNK].meshRenderer.sharedMaterial = mud;
+    }
+
+    private void PoissonDisc() {
+        float cellSize = MIN_TREE_RADIUS / Mathf.Sqrt(2);
+
+        int[,] grid = new int[Mathf.CeilToInt(MAP_SIZE / (10 * cellSize)), Mathf.CeilToInt(MAP_SIZE / (10 * cellSize))];
+        List<Vector2> points = new List<Vector2>();
+        List<Vector2> spawnPoints = new List<Vector2>();
+    }
+
     // Creates Meshes and sets the CellInfo list.
     private void SetCellList(Rectf bounds) {
         // Create Meshes
         foreach (KeyValuePair<Vector2f, Site> entry in sites) {
             List<Vector2f> regionVertices = entry.Value.Region(bounds);
-            List<Edge> siteEdges = entry.Value.Edges;
 
             // Convert from Vector2f List to Vector2[]/Vector3[] arrays
             Vector2[] vertices2d = new Vector2[regionVertices.Count];
@@ -105,52 +163,51 @@ public class MapGenerator : MonoBehaviour {
             int[] triangles = triangulator.Triangulate();
 
             // Add complete cell with mesh
-            cells.Add(new CellInfo(entry.Key, siteEdges, vertices3d, triangles));
+            cells.Add(new CellInfo(entry.Key, vertices3d, triangles));
             cells[cells.Count - 1].SetMaterial(grass);
 
+            SetTileBiome(cells[cells.Count - 1]);
+
         }
     }
 
-    // Sets each tile's biome information
-    private void SetTileBiomes() {
-        int noiseMapSize = MAP_SIZE / RELATIVE_NOISE_SIZE;
+    // Sets a tile's biome information
+    private void SetTileBiome(CellInfo cell) {
+        int noiseX = (int)((cell.siteCoord.x / MAP_SIZE) * noiseMapSize);
+        int noiseY = (int)((cell.siteCoord.y / MAP_SIZE) * noiseMapSize);
 
-        float[,] falloffMap = FalloffGenerator.GenerateFalloffMap(noiseMapSize);
-
-        float[,] heightMap = Noise.GenerateNoiseMap(RANDOM_SEED, noiseMapSize, noiseMapSize, 0,
-            noiseMapInfo[HEIGHT_MAP].scale, noiseMapInfo[HEIGHT_MAP].octaves,
-            noiseMapInfo[HEIGHT_MAP].persistance, noiseMapInfo[HEIGHT_MAP].lacunarity,
-            noiseMapInfo[HEIGHT_MAP].offset);
-        float[,] treeMap = Noise.GenerateNoiseMap(RANDOM_SEED, noiseMapSize, noiseMapSize, 0,
-            noiseMapInfo[TREE_MAP].scale, noiseMapInfo[TREE_MAP].octaves,
-            noiseMapInfo[TREE_MAP].persistance, noiseMapInfo[TREE_MAP].lacunarity,
-            noiseMapInfo[TREE_MAP].offset);
-
-        for (int i = 0; i < cells.Count; i++) {
-            int noiseX = (int)((cells[i].siteCoord.x / MAP_SIZE) * noiseMapSize);
-            int noiseY = (int)((cells[i].siteCoord.y / MAP_SIZE) * noiseMapSize);
-
-            if (WATER_LEVEL > heightMap[noiseX, noiseY] - falloffMap[noiseX, noiseY]) {
-                cells[i].biome = CellInfo.Biome.Water;
-                cells[i].treeFreq = 0.0f;
-                cells[i].SetMaterial(water);
-            } else {
-                cells[i].treeFreq = treeMap[noiseX, noiseY];
-                if (cells[i].treeFreq > FOREST_LEVEL) {
-                    cells[i].biome = CellInfo.Biome.Forest;
-                    cells[i].SetMaterial(mud);
-                } else {
-                    cells[i].biome = CellInfo.Biome.Plains;
-                    cells[i].SetMaterial(grass);
-                }
-
-                // Place Trees
-                ObjectPlacement(cells[i]);
+        if (WATER_LEVEL > heightMap[noiseX, noiseY] - falloffMap[noiseX, noiseY]) {
+            cell.biome = CellInfo.Biome.Water;
+            cell.treeFreq = 0.0f;
+            cell.SetMaterial(water);
+            cell.gameObject.transform.parent = mapObjects[WATER_CHUNK].gameObject.transform;
+        }
+        else {
+            cell.treeFreq = treeMap[noiseX, noiseY];
+            if (cell.treeFreq > FOREST_LEVEL) {
+                cell.biome = CellInfo.Biome.Forest;
+                cell.SetMaterial(mud);
+                cell.gameObject.transform.parent = mapObjects[HEAVY_FOREST_CHUNK].gameObject.transform;
             }
+            else {
+                cell.biome = CellInfo.Biome.Plains;
+                cell.SetMaterial(grass);
+
+                if (cell.treeFreq > 0.5f) {
+                    cell.gameObject.transform.parent = mapObjects[LIGHT_FOREST_CHUNK].gameObject.transform;
+                } else if (cell.treeFreq > 0.3f) {
+                    cell.gameObject.transform.parent = mapObjects[FOREST_EDGE_CHUNK].gameObject.transform;
+                } else {
+                    cell.gameObject.transform.parent = mapObjects[PLAINS_CHUNK].gameObject.transform;
+                }
+            }
+
+            // Place Trees
+            //ObjectPlacement(cell);
         }
     }
-
-    // Places trees throughout cell based on treeFreq
+    
+    // Places trees throughout cell based on treeFreq - DEFUNCT
     private void ObjectPlacement(CellInfo cellInfo) {
         int treeMax = Mathf.RoundToInt(10 * (cellInfo.treeFreq - 0.30f));
 
@@ -279,9 +336,9 @@ public class CellInfo {
 
     // Shape
     public Vector2f siteCoord;
-    public List<Edge> edgeList;
     public Vector2f centroid;
     public Vector3[] vertices;
+    public int[] triangles;
 
     public GameObject gameObject;
     public MeshRenderer renderer;
@@ -291,10 +348,10 @@ public class CellInfo {
 
     public Dictionary<Vector2, GameObject> terrainObjects;
 
-    public CellInfo(Vector2f siteCoord, List<Edge> edgeList, Vector3[] vert, int[] tri) {
-        this.edgeList = edgeList;
+    public CellInfo(Vector2f siteCoord, Vector3[] vert, int[] tri) {
         this.siteCoord = siteCoord;
         vertices = vert;
+        triangles = tri;
         terrainObjects = new Dictionary<Vector2, GameObject>();
 
         // Calculate Centroid
@@ -350,6 +407,49 @@ public class CellInfo {
         
         filter.mesh = mesh;
         collider = gameObject.AddComponent<MeshCollider>();
+    }
+}
+
+public class MapChunk {
+    public static Transform parent;
+
+    public string regionName;
+    public GameObject gameObject;
+    public MeshFilter meshFilter;
+    public MeshRenderer meshRenderer;
+
+    public MapChunk(string name) {
+        regionName = name;
+        gameObject = new GameObject(name);
+        gameObject.transform.parent = MapChunk.parent;
+        meshFilter = gameObject.AddComponent<MeshFilter>();
+        meshRenderer = gameObject.AddComponent<MeshRenderer>();
+
+    }
+
+    public void CreateMesh() {
+        Vector3 position = gameObject.transform.position;
+        gameObject.transform.position = Vector3.zero;
+
+        //Get all mesh filters and combine
+        MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
+        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+        for (int i = 0; i < meshFilters.Length; i++) {
+            combine[i] = new CombineInstance();
+            combine[i].mesh = meshFilters[i].sharedMesh;
+            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+            meshFilters[i].gameObject.SetActive(false);
+        }
+
+        meshFilter.mesh = new Mesh();
+        meshFilter.mesh.CombineMeshes(combine, true, true);
+        gameObject.transform.gameObject.SetActive(true);
+
+        //Return to original position
+        gameObject.transform.position = position;
+
+        //Add collider to mesh (if needed)
+        gameObject.AddComponent<MeshCollider>();
     }
 }
 
