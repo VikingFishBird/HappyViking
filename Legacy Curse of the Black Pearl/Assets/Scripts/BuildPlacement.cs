@@ -1,7 +1,29 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/*
+ *          "Dwelling",
+            "Estate",
+            "Log Hut",
+            "Pig Pen",
+            "Farm",
+            "Port",
+            "Mine",
+            "Clock Tower",
+            "Hospital",
+            "market",
+            "Wall",
+            "barracade",
+            "Tower",
+            "Tavern",
+            "stables",
+            "gate",
+            "library",
+            "barracks",
+            "citadel",
+            "the keep",
+            "blacksmith"
+*/
 public class BuildPlacement : MonoBehaviour
 {
     // Start is called before the first frame update

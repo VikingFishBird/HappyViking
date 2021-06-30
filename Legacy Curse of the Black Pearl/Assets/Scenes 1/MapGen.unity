@@ -3254,25 +3254,25 @@ MonoBehaviour:
   buildings:
   - {fileID: 2462161947295197241, guid: 6273c0206b01c7249ab5cd4edba16ce9, type: 3}
   - {fileID: 612340406530111825, guid: 24b815c8dbf6c2e4ab3507724a29ced9, type: 3}
+  - {fileID: 3142371226541555028, guid: 83d114a92d650ab4e9ed3a7636801063, type: 3}
+  - {fileID: 1494433277181997348, guid: 5d7ef021247d0b2488dc75aa39f7ebe2, type: 3}
+  - {fileID: 4508268471546912991, guid: 0e6ec1a5429c3d847ae82edf51ebc891, type: 3}
+  - {fileID: 8677700463233608566, guid: fbd922929b3207b49b3eab6f14828f8d, type: 3}
+  - {fileID: 6247847317592321436, guid: d8fe4fe8e09aefe42a028ac7f7d70bad, type: 3}
+  - {fileID: 6299198221652658818, guid: 7f8e97fc80135be49bf1191d9042ae18, type: 3}
+  - {fileID: 5685238852500822355, guid: 99380224d1feeac4a8a656f7290c4208, type: 3}
+  - {fileID: 553527325295635076, guid: 0886d13d0c35d0f4ca9f44a21a52712e, type: 3}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 3543237872699822740, guid: a114ecf7011879d4b9e68da8c3c2dd41, type: 3}
+  - {fileID: 6935691474912368457, guid: 674b0e95bf3b92c46968d252a14623c4, type: 3}
+  - {fileID: 1733437741510419762, guid: f0be5de3dc7962d4f939c8d71e54a095, type: 3}
+  - {fileID: 0}
+  - {fileID: 5122881697685144441, guid: fe341879a9e3bc04fb6046b4241d242c, type: 3}
+  - {fileID: 9024631252137496378, guid: 3b523ac6dbbec524381edb382db9e19b, type: 3}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1482969310727714260, guid: 0c0d79dbc9a95ab41b0956ba6ed8dbe4, type: 3}
   BuildListSelectionObj: {fileID: 1418901835}
 --- !u!4 &108520195
 Transform:
@@ -22675,7 +22675,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -33098,7 +33098,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -38293,7 +38293,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 2145991252}
         m_MethodName: Play
         m_Mode: 1
         m_Arguments:
@@ -42591,7 +42591,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -63140,7 +63140,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
