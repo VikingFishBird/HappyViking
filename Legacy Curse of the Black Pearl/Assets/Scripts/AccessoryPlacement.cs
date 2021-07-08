@@ -8,6 +8,7 @@ public class AccessoryPlacement : MonoBehaviour
     public GameObject[] addOns;
     public int size;
     public float[] chance;
+    
 
     // Start is called before the first frame update
     void Start()

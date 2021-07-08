@@ -10,7 +10,7 @@ public class SceneChanger : MonoBehaviour
     public string sceneName;
 
 
-    void Update()
+    public void loadWorld()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {

@@ -3,9 +3,10 @@ using System.Collections;
 
 public class LightCycle : MonoBehaviour
 {
-    
+    public int dayCount;
     public float dayLength;
 
+    //sun color data
     public Color dayColor;
     public Color sunsetColor;
     public Color nightColor;
@@ -18,7 +19,7 @@ public class LightCycle : MonoBehaviour
 
     public bool sunRise=false;
 
-    //nature noises, non-area related
+    //nature noises, non-area related data
     public AudioSource wind;
     public AudioSource morningNoise;
     public AudioSource nightNoise;
@@ -27,13 +28,27 @@ public class LightCycle : MonoBehaviour
     public float morningVol;
     public float nightVol;
 
-    Light lt;
+    //peacefulmusic data
+    public AudioSource chillyBreeze;
+    public float chillyVol;
 
+    public AudioSource hobbitSorrows;
+    public float hobbitVol;
+
+    public int peaceSongSize;
+    //time for song tries
+    public int SONG_WAIT;
+    //chance of song playing
+    public float songChance;
+    Light lt;
+    int songPick;
+    int songWait;
     void Start()
     {
         lt = GetComponent<Light>();
-        
-
+        songPick=0;
+        dayCount=0;
+        songWait=SONG_WAIT;
         StartCoroutine(dayCycle());
         
 
@@ -47,7 +62,31 @@ public class LightCycle : MonoBehaviour
 
     IEnumerator dayCycle() {
         while(true){
+
+            ++dayCount;
             float timeElapsed = 0;
+
+            --songWait;
+            
+            if(songWait==0 && songChance>UnityEngine.Random.Range(0.0f,1.0f)){
+                if(!(chillyBreeze.isPlaying || hobbitSorrows.isPlaying)){
+                    if(songPick==0){
+                        StartCoroutine(FadeIn(chillyBreeze,5f,chillyVol));
+                    }else{
+                        StartCoroutine(FadeIn(hobbitSorrows,5f,hobbitVol));
+                    }
+                }
+                if(songPick==peaceSongSize-1){
+                    songPick=0;
+                } 
+                else{
+                    songPick++;
+                } 
+                songWait=SONG_WAIT;
+                    
+            }
+
+
             yield return new WaitForSeconds(dayLength*.52f);
 
             //StartCoroutine(FadeIn(wind, 5f, windVol));
