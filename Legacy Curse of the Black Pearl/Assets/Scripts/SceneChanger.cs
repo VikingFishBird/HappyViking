@@ -7,14 +7,16 @@ using UnityEngine.SceneManagement;
 public class SceneChanger : MonoBehaviour
 {
 
-    public string sceneName;
+    public string loadSceneName;
+    
 
+    
 
     public void loadWorld()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SceneManager.LoadScene(sceneName);
-        }
+        SceneManager.LoadScene(loadSceneName);
+        
     }
+
+    
 }

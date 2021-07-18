@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - SunLight
+  - KingdomManager
+  - BannerColor
+  - CameraRotator
   layers:
   - Default
   - TransparentFX

@@ -11,7 +11,7 @@ public class bannerScript : MonoBehaviour
 {
     public int selectionIndex;
     List<GameObject> glows;
-
+    public Material[] bannerMaterials;
 
     public void setSelectionIndex(int index)
     {
@@ -31,6 +31,7 @@ public class bannerScript : MonoBehaviour
 
     void Start()
     {
+        
         glows = new List<GameObject>();
         foreach (Transform child in transform)
         {

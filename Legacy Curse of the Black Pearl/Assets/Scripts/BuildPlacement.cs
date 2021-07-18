@@ -30,6 +30,9 @@ public class BuildPlacement : MonoBehaviour
     public GameObject[] buildings;
 
     public BuildListSelection BuildListSelectionObj;
+
+    KingdomManagement kingdomManager;
+
     bool move;
 
     Transform newBuilding;
@@ -37,6 +40,9 @@ public class BuildPlacement : MonoBehaviour
     void Start()
     {
         move = false;
+
+        kingdomManager = GameObject.FindWithTag("KingdomManager").GetComponent<KingdomManagement>();
+
     }
 
     // Update is called once per frame
@@ -65,8 +71,13 @@ public class BuildPlacement : MonoBehaviour
 
     public void SetVariableActive()
     {
+        if(kingdomManager.playerKingdom.wood < kingdomManager.woodCosts[BuildListSelectionObj.selectionIndex]){
+            return;
+        }
+        //material subtraction
+        kingdomManager.playerKingdom.wood -= kingdomManager.woodCosts[BuildListSelectionObj.selectionIndex];
+        
         move = true;
-
 
         RaycastHit hitInfo;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

@@ -86,6 +86,7 @@ MonoBehaviour:
   - {fileID: 441644679481262564}
   - {fileID: 8006164360476890858}
   accessories: {fileID: 8131934584174714666}
+  index: 2
 --- !u!1 &8006164360476890858
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,6 +13,7 @@ public class BuildListSelection : MonoBehaviour
     List<GameObject> buildings;
     public GameObject backdrop;
     public GameObject buildingPreview;
+    //public GameObject kingdomManager;
 
     //desc
     public TextMeshProUGUI description;
@@ -39,6 +40,8 @@ public class BuildListSelection : MonoBehaviour
            // buildings[selectionIndex].transform.GetChild(0).gameObject.SetActive(false);
         selectionIndex = index;
         buildings[selectionIndex].transform.GetChild(0).gameObject.SetActive(true);
+
+        //kingdomManager.transform.GetComponent<KingdomManagement>().ChangePlayerBuildCount(index);
 
         if (!backdrop.activeSelf)
             backdrop.SetActive(true);
