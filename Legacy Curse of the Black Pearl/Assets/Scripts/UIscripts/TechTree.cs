@@ -114,6 +114,43 @@ public class TechTree : MonoBehaviour
         }
     }
 
+    public void StartResearch(GameObject gameObject) {
+        int techTreeIndex = FindTechTreeItem(gameObject);
+
+        if (techTreeIndex == -1) {
+            return;
+        }
+
+        // Check if requirements are meant
+        //
+        //
+
+
+        StartCoroutine(ResearchTimer(techTreeIndex));
+    }
+
+    IEnumerator ResearchTimer(int techTreeIndex) {
+        print(items[techTreeIndex].name);
+        items[techTreeIndex].status = TechStatus.Researching;
+        items[techTreeIndex].gameObject.GetComponent<Button>().enabled = false;
+        UpdateTechTreeColors();
+
+        print(1);
+        yield return new WaitForSeconds(items[techTreeIndex].researchTime);
+
+        items[techTreeIndex].status = TechStatus.Researched;
+        UpdateTechTreeColors();
+        print(2);
+    }
+
+    private int FindTechTreeItem(GameObject g) {
+        for (int i = 0; i < items.Length; i++) {
+            if (items[i].gameObject == g) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
 
 [System.Serializable]
@@ -124,5 +161,5 @@ public struct TechTreeItem {
     public TechBranch branch;
     public TechStatus status;
     public GameObject[] childLines;
+    public int researchTime;
 }
-
